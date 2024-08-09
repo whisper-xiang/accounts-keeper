@@ -1,1 +1,3 @@
-console.log("background.ts is running");
+chrome.sidePanel
+  .setPanelBehavior({ openPanelOnActionClick: true })
+  .catch((error) => console.error(error));

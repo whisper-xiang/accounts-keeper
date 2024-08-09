@@ -1,14 +1,12 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import App from "./main/Popup/index.tsx";
-import "./index.css";
-
 import { ConfigProvider } from "antd";
+import LayoutWrapper from "./components/Layout/layout.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ConfigProvider>
-      <App />
+      <LayoutWrapper />
     </ConfigProvider>
   </StrictMode>
 );

@@ -3,8 +3,12 @@
   "name": "CRXJS React Vite Example",
   "description": "this is my Crxjs&React Chrome ext",
   "version": "1.0.0",
+  "permissions": ["sidePanel"],
+  "side_panel": {
+    "default_path": "src/main/panel/panel.html"
+  },
   "action": {
-    "default_popup": "index.html"
+    "default_title": "Click to open panel"
   },
   "content_scripts": [
     {

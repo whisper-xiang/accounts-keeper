@@ -6,14 +6,10 @@ export default {
     const websitesQuery = new AV.Query("websites");
     const websites = await websitesQuery.find();
     const ids = websites.map((website) => website.id);
-    console.log(ids);
 
-    // 在accounts表中查询这些id对应的账号
     const accountsQuery = new AV.Query("accounts");
     accountsQuery.containedIn("parentId", ids);
     const accounts = await accountsQuery.find();
-
-    console.log(accounts.map((account) => account.toJSON()));
 
     const result = websites.map((website) => {
       const account = accounts.filter(
