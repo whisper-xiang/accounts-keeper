@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { HomeOutlined } from "@ant-design/icons";
+import { HomeOutlined, LockOutlined, SettingOutlined } from "@ant-design/icons";
 import { SideBarItem, SideBarProps } from "../interface";
 
 const Accounts = React.lazy(() => import("../../Accounts/index"));
@@ -15,9 +15,26 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
         icon: <HomeOutlined />,
         component: Accounts,
       },
-      // 可以添加更多项
+      {
+        key: "password-create",
+        label: "密码生成器",
+        icon: <LockOutlined />,
+        component: Accounts,
+      },
+      // {
+      //   key: "settings",
+      //   label: "设置",
+      //   icon: <SettingOutlined />,
+      //   component: Accounts,
+      // },
+      {
+        key: "about",
+        label: "关于",
+        icon: <SettingOutlined />,
+        component: Accounts,
+      },
     ],
-    [] // Empty dependency array ensures this is only created once
+    []
   );
 
   // 处理点击事件
@@ -36,17 +53,17 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
   }, [onItemClick, SideBarItems]);
 
   return (
-    <div className="flex flex-col items-center h-full">
+    <div className="flex flex-col items-center h-full pt-4 pb-20 text-white">
       {SideBarItems.map((item, index) => (
         <div
           key={item.key} // 使用唯一标识符作为 key
-          className={`flex flex-col items-center py-4 cursor-pointer ${
-            activeIndex === index ? "text-white" : ""
+          className={`flex flex-col items-center py-2 cursor-pointer ${
+            activeIndex === index ? "text-primary-500" : ""
           }`}
           onClick={() => handleItemClick(item, index)}
         >
           <span>{item.icon}</span>
-          <span>{item.label}</span>
+          <span style={{ fontSize: "10px" }}>{item.label}</span>
         </div>
       ))}
     </div>

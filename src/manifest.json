@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
-  "name": "CRXJS React Vite Example",
-  "description": "this is my Crxjs&React Chrome ext",
+  "name": "Accounts Keeper",
+  "description": "record and manage your accounts",
   "version": "1.0.0",
   "permissions": ["sidePanel"],
   "side_panel": {

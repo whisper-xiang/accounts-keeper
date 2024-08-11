@@ -5,6 +5,7 @@ export default {
   getAllAccounts: async () => {
     const websitesQuery = new AV.Query("websites");
     const websites = await websitesQuery.find();
+
     const ids = websites.map((website) => website.id);
 
     const accountsQuery = new AV.Query("accounts");

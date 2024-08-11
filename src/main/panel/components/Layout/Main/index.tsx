@@ -6,7 +6,6 @@ interface MainProps {
 }
 
 const Main: React.FC<MainProps> = ({ selectedItem }) => {
-  // 确保 selectedItem 和 selectedItem.component 是有效的组件
   const Component = selectedItem?.component as
     | ComponentType<unknown>
     | undefined;

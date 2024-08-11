@@ -1,12 +1,12 @@
 export interface AccountItem {
-  id: string;
+  objectId?: string;
   account: string;
   password: string;
   remark?: string;
 }
 
 export interface WebsiteItem {
-  id: string;
+  objectId?: string;
   name: string;
   children: AccountItem[];
 }
