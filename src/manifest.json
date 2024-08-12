@@ -3,7 +3,7 @@
   "name": "Accounts Keeper",
   "description": "record and manage your accounts",
   "version": "1.0.0",
-  "permissions": ["sidePanel"],
+  "permissions": ["sidePanel", "storage"],
   "side_panel": {
     "default_path": "src/main/panel/panel.html"
   },

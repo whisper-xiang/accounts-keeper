@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Button, Space, Input, Collapse, Layout, Card } from "antd";
+import React, { useState, useEffect } from "react";
+import { Button, Input, Space, Collapse, Layout, Card } from "antd";
 import {
   CaretRightOutlined,
   CopyOutlined,
@@ -7,11 +7,16 @@ import {
   FileAddOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import { WebsiteItem, AccountItem } from "./interface"; // Adjust import based on actual location
+import { WebsiteItem, AccountItem } from "./interface";
 import api from "@/server/api";
 import "./index.less";
 import CreateAccountModal from "./components/Create";
-import CreateAccount from "./components/Create";
+import {
+  getDatabase,
+  createWebsite as createWebsiteStorage,
+  createAccount as createAccountStorage,
+  removeAccount as removeAccountStorage,
+} from "@/server/storage";
 
 const Accounts: React.FC = () => {
   const { Search, TextArea } = Input;
@@ -19,11 +24,11 @@ const Accounts: React.FC = () => {
 
   const [list, setList] = useState<WebsiteItem[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [filteredList, setFilteredList] = useState(list); // 筛选后的数据
-  const [loading, setLoading] = useState(true); // 加载状态
+  const [filteredList, setFilteredList] = useState<WebsiteItem[]>(list);
+  const [loading, setLoading] = useState(true);
+  const [visible, setVisible] = useState(false);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // 模糊搜索
     const searchText = e.target.value;
     const filtered = list.filter((item) =>
       item.name.toLowerCase().includes(searchText.toLowerCase())
@@ -34,63 +39,37 @@ const Accounts: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await api.getAllAccounts();
+        const res = await getDatabase().finally(() => setLoading(false));
         console.log(res);
 
         setList(res);
         setFilteredList(res);
-        setLoading(false);
       } catch (error) {
-        setLoading(false);
-        if (error instanceof Error) {
-          setError(error.message);
-        }
+        setError(error?.message);
       }
     };
 
     fetchData();
-  }, []); // Empty dependency array means this effect runs only once
+  }, []);
 
-  const removeAccount = (index: number, websiteItem: WebsiteItem) => () => {
-    const newList = [...filteredList];
-
-    websiteItem.children.splice(index, 1);
-
-    console.log(websiteItem, index, "websiteItem");
-
-    setFilteredList([...newList]);
-
-    // const activeItem =
-    // websiteItem? websiteItem.children[index] : filteredList[index].children[index];
-
-    // console.log(objectId);
-
-    // if (objectId) {
-    //   const newList = [...filteredList];
-    //   newList[index].children = newList[index].children.filter(
-    //     (item) => item.objectId !== objectId
-    //   );
-    //   setFilteredList(newList);
-
-    //   // api.removeAccount(objectId);
-    // } else {
-    //   // const newList = [...filteredList];
-    //   // newList.splice(index, 1);
-    //   // setFilteredList(newList);
-    // }
-  };
-
-  const createAccount =
-    (item: AccountItem, index: number, websiteId?: string) => () => {
+  const removeAccount =
+    (index: number, websiteItem: WebsiteItem, accountId?: string) => () => {
       const newList = [...filteredList];
-      newList[index].children.push(item);
-      setFilteredList(newList);
+      websiteItem.children.splice(index, 1);
+      setFilteredList([...newList]);
 
-      // api.createAccount({ ...item, websiteId });
+      console.log(accountId, "accountId");
+
+      if (accountId) {
+        removeAccountStorage({ websiteId: websiteItem.objectId, accountId });
+      }
     };
 
+  const createAccount = (account: AccountItem, websiteId?: string) => () => {
+    createAccountStorage({ websiteId, account });
+  };
+
   const toEdit = (objectId: string, index: number) => () => {
-    // TODO: 编辑账号
     const newList = [...filteredList];
     newList[index].children = newList[index].children.map((item) =>
       item.objectId === objectId ? { ...item, isEditing: true } : item
@@ -101,15 +80,28 @@ const Accounts: React.FC = () => {
   const toUpdate = (accountItem: AccountItem, index: number) => () => {
     const newList = [...filteredList];
     newList[index].children = newList[index].children.map((item) =>
-      item.objectId === item.objectId
+      item.objectId === accountItem.objectId
         ? { ...item, ...accountItem, isEditing: false }
         : item
     );
-
     setFilteredList(newList);
-
-    // api.updateAccount(item);
   };
+
+  const genExtra = (objectId: string, index: number) => (
+    <FileAddOutlined
+      onClick={(event) => {
+        event.stopPropagation();
+        const newList = [...filteredList];
+        newList[index].children.push({
+          account: "",
+          password: "",
+          remark: "",
+          isEditing: true,
+        });
+        setFilteredList(newList);
+      }}
+    />
+  );
 
   const getItems = () => {
     return filteredList.map((item: WebsiteItem, index) => ({
@@ -142,7 +134,7 @@ const Accounts: React.FC = () => {
                       <a
                         href="#"
                         className="ml-2"
-                        onClick={removeAccount(i, item)}
+                        onClick={removeAccount(i, item, child.objectId)}
                       >
                         Remove
                       </a>
@@ -159,7 +151,7 @@ const Accounts: React.FC = () => {
                       <a
                         href="#"
                         className="ml-2"
-                        onClick={createAccount(child, i, item.objectId)}
+                        onClick={createAccount(child, item.objectId)}
                       >
                         Save
                       </a>
@@ -169,9 +161,14 @@ const Accounts: React.FC = () => {
               >
                 <Space.Compact style={{ width: "100%" }} direction="horizontal">
                   <Input
-                    placeholder="default size"
+                    placeholder="Account"
                     prefix={<UserOutlined />}
-                    defaultValue={child.account}
+                    value={child.account}
+                    onChange={(e) => {
+                      const newList = [...filteredList];
+                      newList[index].children[i].account = e.target.value;
+                      setFilteredList(newList);
+                    }}
                     disabled={!child.isEditing}
                   />
                   <Button type="default">
@@ -181,7 +178,12 @@ const Accounts: React.FC = () => {
                 <Space.Compact style={{ width: "100%" }} className="mt-2">
                   <Input
                     prefix={<LockOutlined />}
-                    defaultValue={child.password}
+                    value={child.password}
+                    onChange={(e) => {
+                      const newList = [...filteredList];
+                      newList[index].children[i].password = e.target.value;
+                      setFilteredList(newList);
+                    }}
                     disabled={!child.isEditing}
                   />
                   <Button type="default">
@@ -190,8 +192,13 @@ const Accounts: React.FC = () => {
                 </Space.Compact>
                 <Space style={{ width: "100%" }} className="mt-2">
                   <TextArea
+                    value={child.remark}
+                    onChange={(e) => {
+                      const newList = [...filteredList];
+                      newList[index].children[i].remark = e.target.value;
+                      setFilteredList(newList);
+                    }}
                     disabled={!child.isEditing}
-                    defaultValue={child.remark}
                   />
                 </Space>
               </Card>
@@ -202,40 +209,18 @@ const Accounts: React.FC = () => {
     }));
   };
 
-  const genExtra = (objectId: string, index: number) => (
-    <FileAddOutlined
-      onClick={(event) => {
-        event.stopPropagation();
-        list[index].children.push({
-          account: "",
-          password: "",
-          remark: "",
-          isEditing: true,
-        });
-        setList([...list]);
-      }}
-    />
-  );
-
-  const createWebsite = (data) => {
-    console.log(data, "create website");
+  const createWebsite = async (data) => {
     setVisible(false);
+    const result = await createWebsiteStorage(data);
 
-    // api.createWebsite(data);
     const newList = [...filteredList];
-    newList.push({
-      name: data.name,
-      objectId: "",
-      children: [],
-    });
+    newList.push(result);
     setFilteredList(newList);
-
-    // api.createWebsite(data);
   };
 
-  const [visible, setVisible] = useState(false);
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
+
   return (
     <Layout className="account-list-wrapper">
       <Header className="account-list-header">
@@ -249,7 +234,7 @@ const Accounts: React.FC = () => {
           onClick={() => setVisible(true)}
           className="ml-2"
           type="primary"
-        ></Button>
+        />
       </Header>
       <Content>
         {error && <div className="error">{error}</div>}
