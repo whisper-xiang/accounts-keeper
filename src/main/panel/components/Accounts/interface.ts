@@ -3,6 +3,7 @@ export interface AccountItem {
   account: string;
   password: string;
   remark?: string;
+  isEditing?: boolean;
 }
 
 export interface WebsiteItem {

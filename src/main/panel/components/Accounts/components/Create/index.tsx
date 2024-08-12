@@ -7,7 +7,7 @@ import { WebsiteItem } from "../../interface";
 import { PlusOutlined } from "@ant-design/icons";
 
 type FieldType = {
-  username?: string;
+  name?: string;
   password?: string;
   remember?: string;
   remark?: string;
@@ -29,6 +29,8 @@ const CreateAccount = ({ visible, onOk, onClose }) => {
   const [name, setName] = useState("");
   const inputRef = useRef<InputRef>(null);
 
+  const [form] = Form.useForm();
+
   useEffect(() => {
     // console.log("CreateAccount");
   }, []);
@@ -49,7 +51,15 @@ const CreateAccount = ({ visible, onOk, onClose }) => {
   };
 
   return (
-    <Modal title="Create Account" open={visible} onOk={onOk} onCancel={onClose}>
+    <Modal
+      title="Create website"
+      open={visible}
+      onOk={() => {
+        onOk(form.getFieldsValue());
+        form.resetFields();
+      }}
+      onCancel={onClose}
+    >
       <Form
         name="basic"
         labelCol={{ span: 8 }}
@@ -58,16 +68,17 @@ const CreateAccount = ({ visible, onOk, onClose }) => {
         initialValues={{ remember: true }}
         onFinish={onFinish}
         onFinishFailed={onFinishFailed}
+        form={form}
         autoComplete="off"
       >
-        <Form.Item label="Select">
-          {/* <Select>
+        {/* <Form.Item label="Select">
+          <Select>
             {websites.map((website) => (
               <Select.Option value={website.objectId}>
                 {website.name}
               </Select.Option>
             ))}
-          </Select> */}
+          </Select>
           <Select
             style={{ width: 300 }}
             placeholder="custom dropdown render"
@@ -91,9 +102,9 @@ const CreateAccount = ({ visible, onOk, onClose }) => {
             )}
             options={items.map((item) => ({ label: item, value: item }))}
           />
-        </Form.Item>
+        </Form.Item> */}
 
-        <Form.Item<FieldType>
+        {/* <Form.Item<FieldType>
           label="Username"
           name="username"
           rules={[{ required: true, message: "Please input your username!" }]}
@@ -107,14 +118,14 @@ const CreateAccount = ({ visible, onOk, onClose }) => {
           rules={[{ required: true, message: "Please input your password!" }]}
         >
           <Input.Password />
-        </Form.Item>
+        </Form.Item> */}
 
         <Form.Item<FieldType>
-          label="remark"
-          name="remark"
-          rules={[{ required: true, message: "Please input your password!" }]}
+          label="name"
+          name="name"
+          rules={[{ required: true, message: "Please input your website!" }]}
         >
-          <Input.Password />
+          <Input />
         </Form.Item>
       </Form>
     </Modal>
