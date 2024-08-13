@@ -1,5 +1,5 @@
 import React, { Suspense, ComponentType } from "react";
-import { SideBarItem } from "../interface";
+import { SideBarItem } from "./interface";
 
 interface MainProps {
   selectedItem: SideBarItem | null;
@@ -13,7 +13,7 @@ const Main: React.FC<MainProps> = ({ selectedItem }) => {
   return (
     <div>
       {Component ? (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<div>加载中...</div>}>
           <Component />
         </Suspense>
       ) : (

@@ -1,7 +1,15 @@
-import { Divider, Modal, Space } from "antd";
-
-import type { FormProps, InputRef } from "antd";
-import { Button, Checkbox, Form, Input, Select } from "antd";
+import {
+  Divider,
+  Modal,
+  Space,
+  Button,
+  Checkbox,
+  Form,
+  Input,
+  Select,
+  FormProps,
+  InputRef,
+} from "antd";
 import { useEffect, useRef, useState } from "react";
 import { WebsiteItem } from "../../interface";
 import { PlusOutlined } from "@ant-design/icons";

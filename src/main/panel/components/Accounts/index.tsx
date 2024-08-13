@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Input, Space, Collapse, Layout, Card } from "antd";
+import { Button, Input, Space, Collapse, Card, Layout } from "antd";
 import {
   CaretRightOutlined,
   CopyOutlined,
@@ -18,8 +18,8 @@ import {
   removeAccount as removeAccountStorage,
 } from "@/server/storage";
 
-const Accounts: React.FC = () => {
-  const { Search, TextArea } = Input;
+const Accounts = () => {
+  const { TextArea, Search } = Input;
   const { Header, Content } = Layout;
 
   const [list, setList] = useState<WebsiteItem[]>([]);
@@ -27,6 +27,7 @@ const Accounts: React.FC = () => {
   const [filteredList, setFilteredList] = useState<WebsiteItem[]>(list);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(false);
+  const [activeKey, setActiveKey] = useState<string[]>([]); // 初始展开面板的 key
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchText = e.target.value;
@@ -99,13 +100,16 @@ const Accounts: React.FC = () => {
           isEditing: true,
         });
         setFilteredList(newList);
+        console.log(index);
+
+        setActiveKey([objectId as string]);
       }}
     />
   );
 
   const getItems = () => {
     return filteredList.map((item: WebsiteItem, index) => ({
-      key: index + item.name,
+      key: item.objectId,
       label: item.name,
       extra: genExtra(item.objectId as string, index),
       children: (
@@ -224,11 +228,7 @@ const Accounts: React.FC = () => {
   return (
     <Layout className="account-list-wrapper">
       <Header className="account-list-header">
-        <Search
-          placeholder="Input search text"
-          allowClear
-          onChange={onChange}
-        />
+        <Input placeholder="Input search text" allowClear onChange={onChange} />
         <Button
           icon={<FileAddOutlined />}
           onClick={() => setVisible(true)}
@@ -236,18 +236,20 @@ const Accounts: React.FC = () => {
           type="primary"
         />
       </Header>
+
       <Content>
         {error && <div className="error">{error}</div>}
         <Collapse
           bordered={false}
-          defaultActiveKey={["1"]}
           expandIcon={({ isActive }) => (
             <CaretRightOutlined rotate={isActive ? 90 : 0} />
           )}
           style={{ background: "#fff" }}
           items={getItems()}
+          activeKey={activeKey}
         />
       </Content>
+
       <CreateAccountModal
         visible={visible}
         onClose={() => setVisible(false)}

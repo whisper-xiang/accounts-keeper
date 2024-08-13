@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { ConfigProvider, Space } from "antd";
-import LayoutWrapper from "./components/Layout/layout.tsx";
+import { ConfigProvider } from "antd";
+import LayoutWrapper from "./components/Layout/index.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -22,9 +22,7 @@ createRoot(document.getElementById("root")!).render(
         },
       }}
     >
-      <Space>
-        <LayoutWrapper />
-      </Space>
+      <LayoutWrapper />
     </ConfigProvider>
   </StrictMode>
 );
