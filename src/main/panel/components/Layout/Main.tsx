@@ -11,7 +11,7 @@ const Main: React.FC<MainProps> = ({ selectedItem }) => {
     | undefined;
 
   return (
-    <div>
+    <>
       {Component ? (
         <Suspense fallback={<div>加载中...</div>}>
           <Component />
@@ -19,7 +19,7 @@ const Main: React.FC<MainProps> = ({ selectedItem }) => {
       ) : (
         <div>请选择侧边栏中的项</div>
       )}
-    </div>
+    </>
   );
 };
 

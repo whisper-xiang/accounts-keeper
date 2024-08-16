@@ -4,6 +4,7 @@ import { SideBarItem, SideBarProps } from "./interface";
 
 const Accounts = React.lazy(() => import("../Accounts/index"));
 const Settings = React.lazy(() => import("../Settings/index"));
+const About = React.lazy(() => import("../About/index"));
 
 const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
   const [activeIndex, setActiveIndex] = React.useState<number>(0);
@@ -28,12 +29,12 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
         icon: <SettingOutlined />,
         component: Settings,
       },
-      // {
-      //   key: "about",
-      //   label: "关于",
-      //   icon: <SettingOutlined />,
-      //   component: Accounts,
-      // },
+      {
+        key: "about",
+        label: "关于",
+        icon: <SettingOutlined />,
+        component: About,
+      },
     ],
     []
   );
@@ -47,7 +48,7 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
   );
 
   useEffect(() => {
-    onItemClick(SideBarItems[0]);
+    onItemClick(SideBarItems[1]);
   }, []);
 
   return (

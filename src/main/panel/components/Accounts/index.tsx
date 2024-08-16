@@ -27,7 +27,7 @@ const Accounts = () => {
   const [filteredList, setFilteredList] = useState<WebsiteItem[]>(list);
   const [loading, setLoading] = useState(true);
   const [visible, setVisible] = useState(false);
-  const [activeKey, setActiveKey] = useState<string[]>([]); // 初始展开面板的 key
+  const [activeKey, setActiveKey] = useState<string[]>(); // 初始展开面板的 key
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchText = e.target.value;
@@ -244,6 +244,7 @@ const Accounts = () => {
           expandIcon={({ isActive }) => (
             <CaretRightOutlined rotate={isActive ? 90 : 0} />
           )}
+          onChange={(keys) => setActiveKey(keys as string[])}
           style={{ background: "#fff" }}
           items={getItems()}
           activeKey={activeKey}
