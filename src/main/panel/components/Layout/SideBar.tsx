@@ -48,7 +48,7 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
   );
 
   useEffect(() => {
-    onItemClick(SideBarItems[1]);
+    onItemClick(SideBarItems[0]);
   }, []);
 
   return (

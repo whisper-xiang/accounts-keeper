@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Button, Input, Space, Collapse, Card, Layout } from "antd";
+import { Button, Input, Space, Collapse, Card, Layout, Empty } from "antd";
 import {
   CaretRightOutlined,
   CopyOutlined,
@@ -17,10 +17,12 @@ import {
   createAccount as createAccountStorage,
   removeAccount as removeAccountStorage,
 } from "@/server/storage";
+import AccountsHeader from "./components/AccountsHeader/index.tsx";
+import AccountsMain from "./components/AccountsMain/index.tsx";
 
 const Accounts = () => {
   const { TextArea, Search } = Input;
-  const { Header, Content } = Layout;
+  const { Content, Header } = Layout;
 
   const [list, setList] = useState<WebsiteItem[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -228,27 +230,31 @@ const Accounts = () => {
   return (
     <Layout className="account-list-wrapper">
       <Header className="account-list-header">
-        <Input placeholder="Input search text" allowClear onChange={onChange} />
-        <Button
-          icon={<FileAddOutlined />}
-          onClick={() => setVisible(true)}
-          className="ml-2"
-          type="primary"
-        />
+        <AccountsHeader setVisible={setVisible} onChange={onChange} />
       </Header>
 
-      <Content>
-        {error && <div className="error">{error}</div>}
-        <Collapse
-          bordered={false}
-          expandIcon={({ isActive }) => (
-            <CaretRightOutlined rotate={isActive ? 90 : 0} />
-          )}
-          onChange={(keys) => setActiveKey(keys as string[])}
-          style={{ background: "#fff" }}
-          items={getItems()}
-          activeKey={activeKey}
-        />
+      <Content className="account-list-content">
+        {/* {error && <div className="error">{error}</div>} */}
+
+        <AccountsMain />
+
+        {/* {filteredList.length > 0 ? (
+          <AccountsMain />
+        ) : (
+          // <Collapse
+          //   bordered={false}
+          //   expandIcon={({ isActive }) => (
+          //     <CaretRightOutlined rotate={isActive ? 90 : 0} />
+          //   )}
+          //   onChange={(keys) => setActiveKey(keys as string[])}
+          //   style={{ background: "#fff" }}
+          //   items={getItems()}
+          //   activeKey={activeKey}
+          // />
+          div className="empty">
+            <Empty />
+          </div>
+        )} */}
       </Content>
 
       <CreateAccountModal

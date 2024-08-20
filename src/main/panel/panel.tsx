@@ -2,18 +2,7 @@ import { StrictMode } from "react";
 import { ConfigProvider } from "antd";
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
-import { Routes, Route } from "react-router-dom";
 import LayoutWrapper from "./components/Layout/index.tsx";
-
-const App = () => {
-  return (
-    <Routes>
-      <Route path="/src/main/panel/panel.html" element={<LayoutWrapper />} />
-      {/* <Route path="about" element={<About />} /> */}
-      {/* <Route path="contact" element={<Contact />} /> */}
-    </Routes>
-  );
-};
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
@@ -35,7 +24,8 @@ createRoot(document.getElementById("root")!).render(
           },
         }}
       >
-        <App />
+        <LayoutWrapper />
+        {/* <App /> */}
       </ConfigProvider>
     </StrictMode>
   </BrowserRouter>
