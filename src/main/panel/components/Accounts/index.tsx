@@ -52,6 +52,8 @@ const Accounts = () => {
       }
     };
 
+    console.log(window.location.href);
+
     fetchData();
   }, []);
 

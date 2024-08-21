@@ -16,6 +16,7 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
         label: "账号",
         icon: <HomeOutlined />,
         component: Accounts,
+        path: "/",
       },
       // {
       //   key: "password-create",
@@ -28,12 +29,14 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
         label: "设置",
         icon: <SettingOutlined />,
         component: Settings,
+        path: "/settings",
       },
       {
         key: "about",
         label: "关于",
         icon: <SettingOutlined />,
         component: About,
+        path: "/details",
       },
     ],
     []
@@ -48,7 +51,7 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
   );
 
   useEffect(() => {
-    onItemClick(SideBarItems[0]);
+    // onItemClick(SideBarItems[2]);
   }, []);
 
   return (
