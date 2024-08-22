@@ -10,7 +10,7 @@ import {
 import { WebsiteItem, AccountItem } from "./interface";
 import api from "@/server/api";
 import "./index.less";
-import CreateAccountModal from "./components/Create";
+import CreateSiteModal from "./components/Create";
 import {
   getDatabase,
   createWebsite as createWebsiteStorage,
@@ -259,7 +259,7 @@ const Accounts = () => {
         )} */}
       </Content>
 
-      <CreateAccountModal
+      <CreateSiteModal
         visible={visible}
         onClose={() => setVisible(false)}
         onOk={(data) => createWebsite(data)}

@@ -6,6 +6,8 @@ import { Layout } from "antd";
 import { Routes, Route, useNavigate } from "react-router-dom";
 
 import Details from "../Accounts/details/index.tsx";
+import PwdGenerator from "../Generator/index.tsx";
+import Settings from "../Settings/index.tsx";
 
 const Accounts = React.lazy(() => import("../Accounts/index"));
 
@@ -29,6 +31,8 @@ const LayoutWrapper: React.FC = () => {
             <Routes>
               <Route path="/" element={<Accounts />} />
               <Route path="/details" element={<Details />} />
+              <Route path="/pwd-generator" element={<PwdGenerator />} />
+              <Route path="/settings" element={<Settings />} />
               {/* 其他路由 */}
             </Routes>
           </Suspense>

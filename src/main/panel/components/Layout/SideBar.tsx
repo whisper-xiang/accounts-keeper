@@ -1,10 +1,6 @@
 import React, { useCallback, useMemo, useEffect } from "react";
-import { HomeOutlined, SettingOutlined } from "@ant-design/icons";
+import { HomeOutlined, LockOutlined, SettingOutlined } from "@ant-design/icons";
 import { SideBarItem, SideBarProps } from "./interface";
-
-const Accounts = React.lazy(() => import("../Accounts/index"));
-const Settings = React.lazy(() => import("../Settings/index"));
-const About = React.lazy(() => import("../About/index"));
 
 const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
   const [activeIndex, setActiveIndex] = React.useState<number>(0);
@@ -13,29 +9,26 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
     () => [
       {
         key: "accounts",
-        label: "账号",
+        label: "Accounts",
         icon: <HomeOutlined />,
-        component: Accounts,
         path: "/",
       },
-      // {
-      //   key: "password-create",
-      //   label: "密码生成器",
-      //   icon: <LockOutlined />,
-      //   component: Accounts,
-      // },
+      {
+        key: "pwd-generator",
+        label: "Generator",
+        icon: <LockOutlined />,
+        path: "/pwd-generator",
+      },
       {
         key: "settings",
-        label: "设置",
+        label: "Settings",
         icon: <SettingOutlined />,
-        component: Settings,
         path: "/settings",
       },
       {
         key: "about",
-        label: "关于",
+        label: "About",
         icon: <SettingOutlined />,
-        component: About,
         path: "/details",
       },
     ],

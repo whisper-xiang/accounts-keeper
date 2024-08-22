@@ -1,4 +1,6 @@
 // 密码生成器
-const pwdGenerator = () => {};
+const PwdGenerator = () => {
+  return "密码生成器";
+};
 
-export default pwdGenerator;
+export default PwdGenerator;

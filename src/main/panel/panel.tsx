@@ -1,8 +1,8 @@
 import { StrictMode } from "react";
 import { ConfigProvider } from "antd";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter, HashRouter } from "react-router-dom";
-import LayoutWrapper from "./components/Layout/index.tsx";
+import { HashRouter } from "react-router-dom";
+import App from "./components/Layout/index.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <HashRouter>
@@ -24,8 +24,7 @@ createRoot(document.getElementById("root")!).render(
           },
         }}
       >
-        <LayoutWrapper />
-        {/* <App /> */}
+        <App />
       </ConfigProvider>
     </StrictMode>
   </HashRouter>

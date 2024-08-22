@@ -1,5 +1,5 @@
 import { CaretRightOutlined } from "@ant-design/icons";
-import { Avatar, Button, List, Skeleton } from "antd";
+import { Avatar, List } from "antd"; // Ensure Empty is imported
 import { useEffect, useState } from "react";
 import "./index.less";
 import { Link } from "react-router-dom";
@@ -23,16 +23,16 @@ interface DataType {
 
 const data = [
   {
-    name: "Ant Design Title 1",
+    name: { title: "Mr.", first: "John", last: "Doe" },
   },
   {
-    name: "Ant Design Title 2",
+    name: { title: "Ms.", first: "Jane", last: "Smith" },
   },
   {
-    name: "Ant Design Title 3",
+    name: { title: "Dr.", first: "Alice", last: "Johnson" },
   },
   {
-    name: "Ant Design Title 4",
+    name: { title: "Prof.", first: "Bob", last: "Brown" },
   },
 ];
 
@@ -54,7 +54,7 @@ const AccountsMain = () => {
       renderItem={(item: DataType, index: number) => (
         <List.Item
           actions={[
-            <Link to="/details">
+            <Link to="/details" key={index}>
               <CaretRightOutlined />
             </Link>,
           ]}
@@ -65,12 +65,13 @@ const AccountsMain = () => {
                 src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`}
               />
             }
-            title={<a href="https://ant.design">{item.name}</a>}
+            title={
+              <a href="https://ant.design">{`${item.name.title} ${item.name.first} ${item.name.last}`}</a>
+            }
             description={
               <a href="https://ant.design">
-                {" "}
                 Ant Design, a design language for background applications, is
-                refined by Ant UED Team"
+                refined by Ant UED Team.
               </a>
             }
           />

@@ -56,6 +56,7 @@ const Details: React.FC = () => {
       <header>
         <h1>
           <ArrowLeftOutlined /> Accounts Details
+          <Button>+</Button>
         </h1>
       </header>
       <Flex
