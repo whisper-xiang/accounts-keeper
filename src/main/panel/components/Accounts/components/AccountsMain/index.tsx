@@ -52,30 +52,31 @@ const AccountsMain = () => {
       itemLayout="horizontal"
       dataSource={list}
       renderItem={(item: DataType, index: number) => (
-        <List.Item
-          actions={[
-            <Link to="/details" key={index}>
-              <CaretRightOutlined />
-            </Link>,
-          ]}
-        >
-          <List.Item.Meta
-            avatar={
-              <Avatar
-                src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`}
-              />
-            }
-            title={
-              <a href="https://ant.design">{`${item.name.title} ${item.name.first} ${item.name.last}`}</a>
-            }
-            description={
-              <a href="https://ant.design">
-                Ant Design, a design language for background applications, is
-                refined by Ant UED Team.
-              </a>
-            }
-          />
-        </List.Item>
+        <Link to="/details" key={index}>
+          <List.Item actions={[<CaretRightOutlined />]}>
+            <List.Item.Meta
+              avatar={
+                <Avatar
+                  src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`}
+                />
+              }
+              title={
+                <div className="flex  items-center">
+                  <span
+                    onClick={() => window.open(`https://www.google.com`)}
+                  >{`${item.name.title} ${item.name.first} ${item.name.last}`}</span>
+                  <div className="ml-2 text-xs text-gray-500">4 accounts</div>
+                </div>
+              }
+              description={
+                <>
+                  Ant Design, a design language for background applications, is
+                  refined by Ant UED Team.
+                </>
+              }
+            />
+          </List.Item>
+        </Link>
       )}
     />
   );

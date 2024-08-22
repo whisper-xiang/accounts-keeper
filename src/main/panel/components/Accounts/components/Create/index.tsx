@@ -1,6 +1,23 @@
-import { Modal, Form, Input, FormProps, InputRef, Divider } from "antd";
-import { useEffect, useRef, useState } from "react";
-import { WebsiteItem } from "../../interface";
+import React, { useState } from "react";
+import {
+  Modal,
+  Form,
+  Input,
+  Divider,
+  Button,
+  Space,
+  Tooltip,
+  message,
+  Spin,
+} from "antd";
+import {
+  CopyOutlined,
+  GlobalOutlined,
+  JavaScriptOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import TextArea from "antd/es/input/TextArea";
+import { generateRandomPassword } from "~utils";
 
 type FieldType = {
   site?: string;
@@ -9,95 +26,167 @@ type FieldType = {
   note?: string;
 };
 
-const onFinish: FormProps<FieldType>["onFinish"] = (values) => {
-  console.log("Success:", values);
-};
-
-const onFinishFailed: FormProps<FieldType>["onFinishFailed"] = (errorInfo) => {
-  console.log("Failed:", errorInfo);
-};
-
-let index = 0;
-
 const CreateAccount = ({ visible, onOk, onClose }) => {
-  const [websites, setWebsites] = useState<WebsiteItem[]>([]);
-  const [items, setItems] = useState(["jack", "lucy"]);
-  const [name, setName] = useState("");
-  const inputRef = useRef<InputRef>(null);
-
+  const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false); // Loading state for the entire Modal
 
-  useEffect(() => {
-    // console.log("CreateAccount");
-  }, []);
-
-  const onNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setName(event.target.value);
+  const onOkHandler = () => {
+    setLoading(true); // Start loading
+    form
+      .validateFields()
+      .then((values) => {
+        console.log("Received values of form: ", values);
+        // Simulate API call with setTimeout
+        setTimeout(() => {
+          setLoading(false); // Stop loading
+          onOk(values);
+        }, 2000); // Simulate delay (e.g., API call duration)
+      })
+      .catch(() => {
+        setLoading(false); // Stop loading in case of validation failure
+      });
   };
 
-  const addItem = (
-    e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
-  ) => {
-    e.preventDefault();
-    setItems([...items, name || `New item ${index++}`]);
-    setName("");
-    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 0);
+  const copyTextToClipboard = (text: string): void => {
+    if (!text) {
+      messageApi.open({
+        type: "error",
+        content: "Please input text to copy",
+      });
+      return;
+    }
+    navigator.clipboard.writeText(text).then(() => {
+      messageApi.open({
+        type: "success",
+        content: "Text copied successfully!",
+      });
+    });
+  };
+
+  const handlePasswordGeneration = () => {
+    const newPassword = generateRandomPassword();
+    if (newPassword) {
+      setPassword(newPassword); // Update the password state
+      form.setFieldsValue({ password: newPassword });
+    } else {
+      messageApi.open({
+        type: "error",
+        content: "Failed to generate password!",
+      });
+    }
   };
 
   return (
     <Modal
       title="Create website"
       open={visible}
-      onOk={() => {
-        onOk(form.getFieldsValue());
-        form.resetFields();
-      }}
+      onOk={onOkHandler}
       onCancel={onClose}
+      footer={[
+        <Button key="cancel" onClick={onClose} disabled={loading}>
+          Cancel
+        </Button>,
+        <Button
+          key="submit"
+          type="primary"
+          onClick={onOkHandler}
+          disabled={loading}
+        >
+          Submit
+        </Button>,
+      ]}
     >
-      <Form
-        name="basic"
-        labelCol={{ span: 8 }}
-        wrapperCol={{ span: 16 }}
-        style={{ maxWidth: 600 }}
-        initialValues={{ remember: true }}
-        onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
-        form={form}
-        autoComplete="off"
-      >
-        <Form.Item<FieldType>
-          label="Site"
-          name="site"
-          rules={[{ required: true, message: "Please input your website!" }]}
+      <Spin spinning={loading}>
+        <Form
+          name="basic"
+          labelCol={{ span: 8 }}
+          wrapperCol={{ span: 16 }}
+          initialValues={{ remember: true }}
+          form={form}
+          autoComplete="off"
         >
-          <Input />
-        </Form.Item>
-        <Form.Item<FieldType>
-          label="Username"
-          name="username"
-          rules={[{ required: true, message: "Please input your username!" }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item<FieldType>
-          label="Password"
-          name="password"
-          rules={[{ required: true, message: "Please input your password!" }]}
-        >
-          <Input.Password />
-        </Form.Item>
-        Make sure you're saving your current password for this site
-        <Divider dashed />
-        <Form.Item<FieldType>
-          label="note"
-          name="note"
-          rules={[{ required: true, message: "Please input your website!" }]}
-        >
-          <Input />
-        </Form.Item>
-      </Form>
+          <Form.Item<FieldType>
+            label="Site"
+            name="site"
+            rules={[{ required: true, message: "Please input your website!" }]}
+          >
+            <Space.Compact style={{ width: "100%" }}>
+              <Input
+                placeholder="input website!"
+                prefix={<GlobalOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+              />
+              <Tooltip title="copy to clipboard">
+                <Button
+                  type="default"
+                  onClick={() => {
+                    copyTextToClipboard(form.getFieldValue("site"));
+                  }}
+                >
+                  <CopyOutlined />
+                </Button>
+              </Tooltip>
+            </Space.Compact>
+          </Form.Item>
+          <Form.Item<FieldType>
+            label="Username"
+            name="username"
+            rules={[{ required: true, message: "Please input your username!" }]}
+          >
+            <Space.Compact style={{ width: "100%" }}>
+              <Input
+                placeholder="input username"
+                prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+              />
+              <Tooltip title="copy to clipboard">
+                <Button
+                  type="default"
+                  onClick={() => {
+                    copyTextToClipboard(form.getFieldValue("username"));
+                  }}
+                >
+                  <CopyOutlined />
+                </Button>
+              </Tooltip>
+            </Space.Compact>
+          </Form.Item>
+          <Form.Item<FieldType>
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: "Please input your password!" }]}
+          >
+            <Space.Compact style={{ width: "100%" }}>
+              <Input.Password
+                placeholder="input password"
+                value={password} // Bind the password state to the input value
+                onChange={(e) => setPassword(e.target.value)} // Ensure changes to the input update the state
+              />
+              <Tooltip title="password generator">
+                <Button type="default" onClick={handlePasswordGeneration}>
+                  <JavaScriptOutlined />
+                </Button>
+              </Tooltip>
+              <Tooltip title="copy to clipboard">
+                <Button
+                  type="default"
+                  onClick={() => {
+                    copyTextToClipboard(form.getFieldValue("password"));
+                  }}
+                >
+                  <CopyOutlined />
+                </Button>
+              </Tooltip>
+            </Space.Compact>
+          </Form.Item>
+          Make sure you're saving your current password for this site
+          <Divider dashed />
+          <Form.Item<FieldType> label="Note" name="note">
+            <TextArea placeholder="input note" allowClear />
+          </Form.Item>
+        </Form>
+      </Spin>
+      {contextHolder}
     </Modal>
   );
 };

@@ -39,24 +39,6 @@ const Accounts = () => {
     setFilteredList(filtered);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await getDatabase().finally(() => setLoading(false));
-        console.log(res);
-
-        setList(res);
-        setFilteredList(res);
-      } catch (error) {
-        setError(error?.message);
-      }
-    };
-
-    console.log(window.location.href);
-
-    fetchData();
-  }, []);
-
   const removeAccount =
     (index: number, websiteItem: WebsiteItem, accountId?: string) => () => {
       const newList = [...filteredList];
@@ -226,43 +208,34 @@ const Accounts = () => {
     setFilteredList(newList);
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>{error}</p>;
+  const getWebsiteList = async () => {
+    try {
+      const res = await getDatabase().finally(() => setLoading(false));
+      console.log(res);
+
+      setList(res);
+      setFilteredList(res);
+    } catch (error) {
+      setError(error?.message);
+    }
+  };
+
+  useEffect(() => {
+    getWebsiteList();
+  }, []);
 
   return (
     <Layout className="account-list-wrapper">
       <Header className="account-list-header">
         <AccountsHeader setVisible={setVisible} onChange={onChange} />
       </Header>
-
       <Content className="account-list-content">
-        {/* {error && <div className="error">{error}</div>} */}
-
         <AccountsMain />
-
-        {/* {filteredList.length > 0 ? (
-          <AccountsMain />
-        ) : (
-          // <Collapse
-          //   bordered={false}
-          //   expandIcon={({ isActive }) => (
-          //     <CaretRightOutlined rotate={isActive ? 90 : 0} />
-          //   )}
-          //   onChange={(keys) => setActiveKey(keys as string[])}
-          //   style={{ background: "#fff" }}
-          //   items={getItems()}
-          //   activeKey={activeKey}
-          // />
-          div className="empty">
-            <Empty />
-          </div>
-        )} */}
       </Content>
-
       <CreateSiteModal
         visible={visible}
         onClose={() => setVisible(false)}
-        onOk={(data) => createWebsite(data)}
+        onOk={() => getWebsiteList()}
       />
     </Layout>
   );
