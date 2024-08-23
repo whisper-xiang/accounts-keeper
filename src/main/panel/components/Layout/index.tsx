@@ -30,7 +30,7 @@ const LayoutWrapper: React.FC = () => {
           <Suspense fallback={<div>Loading...</div>}>
             <Routes>
               <Route path="/" element={<Accounts />} />
-              <Route path="/details" element={<Details />} />
+              <Route path="/details/:id" element={<Details />} />
               <Route path="/pwd-generator" element={<PwdGenerator />} />
               <Route path="/settings" element={<Settings />} />
               {/* 其他路由 */}

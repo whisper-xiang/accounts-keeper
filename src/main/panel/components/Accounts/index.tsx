@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Button, Input, Space, Collapse, Card, Layout, Empty } from "antd";
 import {
-  CaretRightOutlined,
   CopyOutlined,
   LockOutlined,
   FileAddOutlined,

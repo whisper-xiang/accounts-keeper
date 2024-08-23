@@ -5,34 +5,34 @@ import "./index.less";
 import { Link } from "react-router-dom";
 
 interface DataType {
-  gender?: string;
-  name: {
-    title?: string;
-    first?: string;
-    last?: string;
-  };
-  email?: string;
-  picture: {
-    large?: string;
-    medium?: string;
-    thumbnail?: string;
-  };
-  nat?: string;
-  loading: boolean;
+  id: string;
+  icon?: string;
+  site: string;
+  note: string;
+  accountCount: number;
 }
 
-const data = [
+const listData = [
   {
-    name: { title: "Mr.", first: "John", last: "Doe" },
+    id: "1",
+    icon: "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png",
+    site: "Google",
+    note: "Ant Design, a design language for background applications, is refined by Ant UED Team.",
+    accountCount: 4,
   },
   {
-    name: { title: "Ms.", first: "Jane", last: "Smith" },
+    id: "2",
+    icon: "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png",
+    note: "Work",
+    accountCount: 2,
+    site: "Facebook",
   },
   {
-    name: { title: "Dr.", first: "Alice", last: "Johnson" },
-  },
-  {
-    name: { title: "Prof.", first: "Bob", last: "Brown" },
+    id: "3",
+    icon: "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png",
+    note: "Personal",
+    accountCount: 1,
+    site: "Facebook",
   },
 ];
 
@@ -42,7 +42,7 @@ const AccountsMain = () => {
 
   useEffect(() => {
     setInitLoading(false);
-    setList(data);
+    setList(listData);
   }, []);
 
   return (
@@ -51,29 +51,20 @@ const AccountsMain = () => {
       loading={initLoading}
       itemLayout="horizontal"
       dataSource={list}
-      renderItem={(item: DataType, index: number) => (
-        <Link to="/details" key={index}>
+      renderItem={(item: DataType) => (
+        <Link to={`/details/${item.id}`} key={item.id}>
           <List.Item actions={[<CaretRightOutlined />]}>
             <List.Item.Meta
-              avatar={
-                <Avatar
-                  src={`https://api.dicebear.com/7.x/miniavs/svg?seed=${index}`}
-                />
-              }
+              avatar={<Avatar src={item.icon} />}
               title={
                 <div className="flex  items-center">
                   <span
-                    onClick={() => window.open(`https://www.google.com`)}
-                  >{`${item.name.title} ${item.name.first} ${item.name.last}`}</span>
+                    onClick={() => window.open(item.site)}
+                  >{`${item.site}`}</span>
                   <div className="ml-2 text-xs text-gray-500">4 accounts</div>
                 </div>
               }
-              description={
-                <>
-                  Ant Design, a design language for background applications, is
-                  refined by Ant UED Team.
-                </>
-              }
+              description={<>{item.note}</>}
             />
           </List.Item>
         </Link>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   Form,
@@ -26,10 +26,23 @@ type FieldType = {
   note?: string;
 };
 
-const CreateAccount = ({ visible, onOk, onClose }) => {
+const CreateAccount = ({
+  visible,
+  onOk,
+  onClose,
+  type = "website",
+  siteValue,
+}: {
+  visible: boolean;
+  onOk: (values: FieldType) => void;
+  onClose: () => void;
+  type: "account" | "website";
+  siteValue?: string;
+}) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const [password, setPassword] = useState("");
+  const [site, setSite] = useState("");
   const [loading, setLoading] = useState(false); // Loading state for the entire Modal
 
   const onOkHandler = () => {
@@ -78,6 +91,13 @@ const CreateAccount = ({ visible, onOk, onClose }) => {
     }
   };
 
+  useEffect(() => {
+    if (siteValue) {
+      form.setFieldsValue({ site: siteValue });
+      setSite(siteValue); // Update the site state
+    }
+  }, []);
+
   return (
     <Modal
       title="Create website"
@@ -101,8 +121,8 @@ const CreateAccount = ({ visible, onOk, onClose }) => {
       <Spin spinning={loading}>
         <Form
           name="basic"
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 16 }}
+          labelCol={{ span: 4 }}
+          wrapperCol={{ span: 20 }}
           initialValues={{ remember: true }}
           form={form}
           autoComplete="off"
@@ -110,11 +130,21 @@ const CreateAccount = ({ visible, onOk, onClose }) => {
           <Form.Item<FieldType>
             label="Site"
             name="site"
-            rules={[{ required: true, message: "Please input your website!" }]}
+            rules={
+              type === "website"
+                ? [{ required: true, message: "Please input your website!" }]
+                : [
+                    {
+                      required: false,
+                    },
+                  ]
+            }
           >
             <Space.Compact style={{ width: "100%" }}>
               <Input
+                disabled={type === "account"}
                 placeholder="input website!"
+                value={site}
                 prefix={<GlobalOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
               />
               <Tooltip title="copy to clipboard">
@@ -132,7 +162,15 @@ const CreateAccount = ({ visible, onOk, onClose }) => {
           <Form.Item<FieldType>
             label="Username"
             name="username"
-            rules={[{ required: true, message: "Please input your username!" }]}
+            rules={
+              type === "account"
+                ? [{ required: true, message: "Please input your username!" }]
+                : [
+                    {
+                      required: false,
+                    },
+                  ]
+            }
           >
             <Space.Compact style={{ width: "100%" }}>
               <Input
@@ -154,7 +192,15 @@ const CreateAccount = ({ visible, onOk, onClose }) => {
           <Form.Item<FieldType>
             label="Password"
             name="password"
-            rules={[{ required: true, message: "Please input your password!" }]}
+            rules={
+              type === "account"
+                ? [{ required: true, message: "Please input your password!" }]
+                : [
+                    {
+                      required: false,
+                    },
+                  ]
+            }
           >
             <Space.Compact style={{ width: "100%" }}>
               <Input.Password
