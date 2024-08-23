@@ -1,4 +1,4 @@
-import React, { Suspense, useState } from "react";
+import React, { Suspense } from "react";
 import "./style.less";
 import SideBar from "./SideBar.tsx";
 import { SideBarItem } from "./interface.ts";
@@ -8,14 +8,14 @@ import { Routes, Route, useNavigate } from "react-router-dom";
 import Details from "../Accounts/details/index.tsx";
 import PwdGenerator from "../Generator/index.tsx";
 import Settings from "../Settings/index.tsx";
+import About from "../About/index.tsx";
 
 const Accounts = React.lazy(() => import("../Accounts/index"));
 
-const { Header, Sider, Content } = Layout;
+const { Sider, Content } = Layout;
 
 const LayoutWrapper: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedItem, setSelectedItem] = useState<SideBarItem | null>(null);
 
   const handleSideBarItemClick = (item: SideBarItem) => {
     if (item.path) {
@@ -33,7 +33,7 @@ const LayoutWrapper: React.FC = () => {
               <Route path="/details/:id" element={<Details />} />
               <Route path="/pwd-generator" element={<PwdGenerator />} />
               <Route path="/settings" element={<Settings />} />
-              {/* 其他路由 */}
+              <Route path="/about" element={<About />} />
             </Routes>
           </Suspense>
         </Content>

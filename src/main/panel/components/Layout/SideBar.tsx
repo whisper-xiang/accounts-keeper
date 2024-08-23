@@ -29,7 +29,7 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
         key: "about",
         label: "About",
         icon: <SettingOutlined />,
-        path: "/details",
+        path: "/about",
       },
     ],
     []

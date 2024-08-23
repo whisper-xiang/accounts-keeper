@@ -26,7 +26,7 @@ import {
 } from "antd";
 import "./index.less";
 import CreateSiteModal from "../components/Create";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 const Details: React.FC = () => {
   const [modal, contextHolder] = Modal.useModal();
@@ -37,6 +37,7 @@ const Details: React.FC = () => {
   const { id } = useParams();
   const [messageApi, messageContextHolder] = message.useMessage();
   const { TextArea } = Input;
+  const navigate = useNavigate();
 
   interface AccountType {
     id: number;
@@ -148,7 +149,7 @@ const Details: React.FC = () => {
     <div className="accounts-details-container">
       <header>
         <h1>
-          <ArrowLeftOutlined />
+          <ArrowLeftOutlined onClick={() => navigate(-1)} />
           <span className="ml-2">{site}</span>
         </h1>
         <Button
