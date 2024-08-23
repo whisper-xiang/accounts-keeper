@@ -14,10 +14,12 @@ import {
   CopyOutlined,
   GlobalOutlined,
   JavaScriptOutlined,
+  LockOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import { generateRandomPassword } from "~utils";
+import "./index.less";
 
 type FieldType = {
   site?: string;
@@ -205,6 +207,7 @@ const CreateAccount = ({
             <Space.Compact style={{ width: "100%" }}>
               <Input.Password
                 placeholder="input password"
+                prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
                 value={password} // Bind the password state to the input value
                 onChange={(e) => setPassword(e.target.value)} // Ensure changes to the input update the state
               />
