@@ -12,7 +12,6 @@ createRoot(document.getElementById("root")!).render(
           components: {
             Card: {
               headerHeight: 32,
-              /* 这里是你的组件 token */
             },
           },
           token: {

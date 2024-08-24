@@ -1,70 +1,44 @@
 import { CaretRightOutlined } from "@ant-design/icons";
-import { Avatar, List } from "antd"; // Ensure Empty is imported
-import { useEffect, useState } from "react";
+import { Avatar, List } from "antd";
 import "./index.less";
 import { Link } from "react-router-dom";
+import { WebsiteItem } from "../../interface";
 
-interface DataType {
-  id: string;
-  icon?: string;
-  site: string;
-  note: string;
-  accountCount: number;
-}
-
-const listData = [
-  {
-    id: "1",
-    icon: "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png",
-    site: "Google",
-    note: "Ant Design, a design language for background applications, is refined by Ant UED Team.",
-    accountCount: 4,
-  },
-  {
-    id: "2",
-    icon: "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png",
-    note: "Work",
-    accountCount: 2,
-    site: "Facebook",
-  },
-  {
-    id: "3",
-    icon: "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png",
-    note: "Personal",
-    accountCount: 1,
-    site: "Facebook",
-  },
-];
-
-const AccountsMain = () => {
-  const [initLoading, setInitLoading] = useState(true);
-  const [list, setList] = useState<DataType[]>([]);
-
-  useEffect(() => {
-    setInitLoading(false);
-    setList(listData);
-  }, []);
-
+const AccountsMain = ({ list }: { list: WebsiteItem[] | undefined }) => {
   return (
     <List
       className="accounts-main-list mt-4"
-      loading={initLoading}
+      loading={!list}
       itemLayout="horizontal"
       dataSource={list}
-      renderItem={(item: DataType) => (
-        <Link to={`/details/${item.id}`} key={item.id}>
+      renderItem={(item: WebsiteItem) => (
+        <Link to={`/details/${item.objectId}`} key={item.objectId}>
           <List.Item actions={[<CaretRightOutlined />]}>
             <List.Item.Meta
-              avatar={<Avatar src={item.icon} />}
+              avatar={
+                <Avatar
+                  src={
+                    item.icon ||
+                    "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png"
+                  }
+                />
+              }
               title={
-                <div className="flex  items-center">
+                <div className="flex items-center justify-between">
                   <span
-                    onClick={() => window.open(item.site)}
-                  >{`${item.site}`}</span>
-                  <div className="ml-2 text-xs text-gray-500">4 accounts</div>
+                    style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                    onClick={() => window.open(item.url)}
+                  >{`${item.url}`}</span>
+                  <div className="ml-2 text-xs text-gray-500">
+                    {item.accountCount} accounts{" "}
+                  </div>
                 </div>
               }
-              description={<>{item.note}</>}
+              description={item.note}
             />
           </List.Item>
         </Link>

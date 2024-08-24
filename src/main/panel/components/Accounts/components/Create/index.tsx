@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Modal,
   Form,
@@ -20,6 +20,10 @@ import {
 import TextArea from "antd/es/input/TextArea";
 import { generateRandomPassword } from "~utils";
 import "./index.less";
+import {
+  addWebsite as addWebsiteApi,
+  addAccount as addAccountApi,
+} from "@/server/cloud";
 
 type FieldType = {
   site?: string;
@@ -28,18 +32,25 @@ type FieldType = {
   note?: string;
 };
 
+enum CreateType {
+  Website = "website",
+  Account = "account",
+}
+
 const CreateAccount = ({
   visible,
   onOk,
   onClose,
   type = "website",
   siteValue,
+  siteId,
 }: {
   visible: boolean;
   onOk: (values: FieldType) => void;
   onClose: () => void;
   type: "account" | "website";
   siteValue?: string;
+  siteId?: string;
 }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
@@ -47,20 +58,60 @@ const CreateAccount = ({
   const [site, setSite] = useState("");
   const [loading, setLoading] = useState(false); // Loading state for the entire Modal
 
+  const addWebsite = (site: string, note: string) => {
+    return addWebsiteApi(site, note);
+  };
+
+  const addAccount = (
+    websiteId: string,
+    username: string,
+    password: string,
+    note?: string
+  ) => {
+    addAccountApi(websiteId, username, password, note)
+      .then(() => {
+        messageApi.open({
+          type: "success",
+          content: "Account created successfully!",
+        });
+      })
+      .catch((error) => {
+        messageApi.open({
+          type: "error",
+          content: error,
+        });
+      });
+  };
+
   const onOkHandler = () => {
     setLoading(true); // Start loading
     form
       .validateFields()
-      .then((values) => {
-        console.log("Received values of form: ", values);
-        // Simulate API call with setTimeout
-        setTimeout(() => {
-          setLoading(false); // Stop loading
-          onOk(values);
-        }, 2000); // Simulate delay (e.g., API call duration)
+      .then(async (values) => {
+        const { site, username, password, note } = values;
+
+        if (type === CreateType.Website) {
+          const websiteId = await addWebsite(site, note);
+
+          if (username && password) {
+            addAccount(websiteId, username, password);
+          } else {
+            messageApi.open({
+              type: "success",
+              content: "Website created successfully!",
+            });
+          }
+        } else {
+          if (siteId) {
+            addAccount(siteId, username, password);
+          }
+        }
+        onOk(values);
+        onClose();
+        form.resetFields();
       })
-      .catch(() => {
-        setLoading(false); // Stop loading in case of validation failure
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -125,7 +176,6 @@ const CreateAccount = ({
           name="basic"
           labelCol={{ span: 4 }}
           wrapperCol={{ span: 20 }}
-          initialValues={{ remember: true }}
           form={form}
           autoComplete="off"
         >
@@ -146,7 +196,7 @@ const CreateAccount = ({
               <Input
                 disabled={type === "account"}
                 placeholder="input website!"
-                value={site}
+                defaultValue={site}
                 prefix={<GlobalOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
               />
               <Tooltip title="copy to clipboard">
@@ -185,6 +235,7 @@ const CreateAccount = ({
                   onClick={() => {
                     copyTextToClipboard(form.getFieldValue("username"));
                   }}
+                  tabIndex={-1}
                 >
                   <CopyOutlined />
                 </Button>
@@ -219,6 +270,7 @@ const CreateAccount = ({
               <Tooltip title="copy to clipboard">
                 <Button
                   type="default"
+                  tabIndex={-1}
                   onClick={() => {
                     copyTextToClipboard(form.getFieldValue("password"));
                   }}
@@ -230,7 +282,10 @@ const CreateAccount = ({
           </Form.Item>
           Make sure you're saving your current password for this site
           <Divider dashed />
-          <Form.Item<FieldType> label="Note" name="note">
+          <Form.Item<FieldType>
+            label={type === "account" ? "Note" : "Site note"}
+            name="note"
+          >
             <TextArea placeholder="input note" allowClear />
           </Form.Item>
         </Form>

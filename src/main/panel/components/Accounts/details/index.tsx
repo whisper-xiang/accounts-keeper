@@ -4,7 +4,6 @@ import {
   CopyOutlined,
   EditOutlined,
   FileAddOutlined,
-  GlobalOutlined,
   UserOutlined,
   SaveOutlined,
   CloseOutlined,
@@ -27,6 +26,8 @@ import {
 import "./index.less";
 import CreateSiteModal from "../components/Create";
 import { useNavigate, useParams } from "react-router-dom";
+import { api } from "@/server";
+import { AccountItem } from "../interface";
 
 const Details: React.FC = () => {
   const [modal, contextHolder] = Modal.useModal();
@@ -34,46 +35,19 @@ const Details: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [visible, setVisible] = useState<boolean>(false);
   const [list, setList] = useState<FormAccountType[]>([]);
-  const { id } = useParams();
+  const { id: objectId } = useParams();
   const [messageApi, messageContextHolder] = message.useMessage();
   const { TextArea } = Input;
   const navigate = useNavigate();
 
-  interface AccountType {
-    id: number;
-    site: string;
-    username: string;
-    password: string;
-    note: string;
-  }
-
-  interface FormAccountType extends AccountType {
+  interface FormAccountType extends AccountItem {
     isEdit?: boolean;
   }
 
-  const accountListDemo: FormAccountType[] = [
-    {
-      id: 1,
-      site: "https://www.google.com",
-      username: "admin",
-      password: "123456",
-      note: "this is a note",
-      isEdit: false,
-    },
-    {
-      id: 2,
-      username: "admin1",
-      password: "123456",
-      note: "this is a note",
-      site: "https://www.baidu.com",
-      isEdit: false,
-    },
-  ];
-
-  const getAccountList = () => {
-    // TODO: 获取服务器上的账户列表
-    setSite("facebook.com");
-    setList(accountListDemo);
+  const getAccountList = async () => {
+    const websiteDetail = await api.fetchWebsiteById(objectId);
+    setSite(websiteDetail.url);
+    setList(websiteDetail.children);
   };
 
   const onFinish = (values: FormAccountType, index: number) => {
@@ -187,7 +161,7 @@ const Details: React.FC = () => {
             loading={loading}
             actions={actions}
             className="accounts-details-card"
-            key={item.id}
+            key={item.objectId}
           >
             <Card.Meta
               avatar={
@@ -199,7 +173,7 @@ const Details: React.FC = () => {
                     (formRefs.current[index] =
                       el as FormInstance<FormAccountType> | null)
                   }
-                  name={`form_${item.id}`}
+                  name={`form_${item.objectId}`}
                   labelCol={{ span: 3 }}
                   wrapperCol={{ span: 21 }}
                   layout="vertical"

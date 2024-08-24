@@ -1,69 +1,179 @@
-import AV from "./leancloud-config";
+import AV from "./leanCloud-config";
 
-export default {
-  // 获取所有账号
-  getAllAccounts: async () => {
-    const websitesQuery = new AV.Query("websites");
-    const websites = await websitesQuery.find();
+// export default {
+//   // 获取所有账号
+//   getAllAccounts: async () => {
+//     const websitesQuery = new AV.Query("websites");
+//     const websites = await websitesQuery.find();
 
-    const ids = websites.map((website) => website.id);
+//     const ids = websites.map((website) => website.id);
 
-    const accountsQuery = new AV.Query("accounts");
-    accountsQuery.containedIn("parentId", ids);
-    const accounts = await accountsQuery.find();
+//     const accountsQuery = new AV.Query("accounts");
+//     accountsQuery.containedIn("parentId", ids);
+//     const accounts = await accountsQuery.find();
 
-    const result = websites.map((website) => {
-      const account = accounts.filter(
-        (account) => account.get("parentId") === website.id
-      );
-      return {
-        ...website.toJSON(),
-        children: account.map((acc) => acc.toJSON()),
-      };
+//     const result = websites.map((website) => {
+//       const account = accounts.filter(
+//         (account) => account.get("parentId") === website.id
+//       );
+//       return {
+//         ...website.toJSON(),
+//         children: account.map((acc) => acc.toJSON()),
+//       };
+//     });
+
+//     return result;
+//   },
+
+//   // 新增账号
+//   addAccount: async (data) => {
+//     const websiteId = data.websiteId;
+//     if (websiteId) {
+//       const accountObj = new AV.Object("accounts");
+
+//       accountObj.set("username", data.username);
+
+//       accountObj.set("password", data.password);
+
+//       accountObj.set("parentId", websiteId);
+
+//       await accountObj.save();
+
+//       return accountObj.toJSON();
+//     } else {
+//       const website = new AV.Object("websites");
+//       website.set("name", data.websiteName);
+//       website.set("url", data.websiteUrl);
+//       await website.save();
+
+//       const accountObj = new AV.Object("accounts");
+
+//       accountObj.set("username", data.username);
+
+//       accountObj.set("password", data.password);
+
+//       accountObj.set("parentId", website.id);
+
+//       await accountObj.save();
+
+//       return accountObj.toJSON();
+//     }
+//   },
+
+//   // 删除账号
+//   deleteAccount: async (id) => {
+//     const account = AV.Object.createWithoutData("accounts", id);
+//     await account.destroy();
+//     return id;
+//   },
+// };
+
+export async function ensureTableExists(tableName: string): Promise<void> {
+  try {
+    const query = new AV.Query(tableName);
+    await query.first(); // 尝试查询表中的第一条记录
+  } catch (error) {
+    if ((error as AV.Error).code === 101) {
+      // 表不存在的情况
+      const Table = AV.Object.extend(tableName);
+      const dummyRecord = new Table();
+      await dummyRecord.save().then((record) => record.destroy()); // 创建并删除一条记录，以确保表存在但没有数据
+      console.log(`${tableName} 表已创建`);
+    } else {
+      throw error; // 其他错误，抛出异常
+    }
+  }
+}
+
+export async function fetchAndAssembleData() {
+  // 确保 Websites 和 Accounts 表存在
+  await ensureTableExists("Websites");
+  await ensureTableExists("Accounts");
+
+  // 查找 Websites 表中的所有数据
+  const websitesQuery = new AV.Query("Websites");
+  websitesQuery.descending("createdAt");
+  const websites = await websitesQuery.find();
+
+  // 查找 Accounts 表中的所有数据
+  const accountsQuery = new AV.Query("Accounts");
+  websitesQuery.descending("createdAt");
+  const accounts = await accountsQuery.find();
+
+  // 数据拼装
+  const websitesData = websites.map((website) => {
+    const websiteId = website.id;
+
+    // 查找与此 website 相关的 accounts
+    const relatedAccounts = accounts.filter((account) => {
+      return account.get("belong") === websiteId;
     });
 
-    return result;
-  },
+    return {
+      ...website.toJSON(),
+      accountCount: relatedAccounts.length,
+      children: relatedAccounts.map((account) => account.toJSON()),
+    };
+  });
 
-  // 新增账号
-  addAccount: async (data) => {
-    const websiteId = data.websiteId;
-    if (websiteId) {
-      const accountObj = new AV.Object("accounts");
+  return websitesData;
+}
 
-      accountObj.set("username", data.username);
+export async function fetchWebsiteById(websiteId: string) {
+  const websiteQuery = new AV.Query("Websites");
+  websiteQuery.equalTo("objectId", websiteId);
+  const website = await websiteQuery.first();
+  if (website) {
+    const accountQuery = new AV.Query("Accounts");
+    accountQuery.equalTo("belong", websiteId).descending("createdAt");
+    const accounts = await accountQuery.find();
+    return {
+      ...website.toJSON(),
+      children: accounts.map((account) => account.toJSON()),
+    };
+  } else {
+    return null;
+  }
+}
 
-      accountObj.set("password", data.password);
+export async function fetchAccounts(websiteId: string) {
+  const accountsQuery = new AV.Query("Accounts");
+  accountsQuery.equalTo("belong", websiteId);
+  const accounts = await accountsQuery.find();
+  return accounts.map((account) => account.toJSON());
+}
 
-      accountObj.set("parentId", websiteId);
+export async function addWebsite(url: string, note: string) {
+  const website = new AV.Object("Websites");
+  website.set("url", url);
+  website.set("note", note);
+  await website.save();
+  return website.id;
+}
 
-      await accountObj.save();
+export async function deleteWebsite(websiteId: string) {
+  const website = AV.Object.createWithoutData("Websites", websiteId);
+  await website.destroy();
+  return websiteId;
+}
 
-      return accountObj.toJSON();
-    } else {
-      const website = new AV.Object("websites");
-      website.set("name", data.websiteName);
-      website.set("url", data.websiteUrl);
-      await website.save();
+export async function addAccount(
+  websiteId: string,
+  username: string,
+  password: string,
+  note?: string
+) {
+  const account = new AV.Object("Accounts");
+  account.set("username", username);
+  account.set("password", password);
+  account.set("belong", websiteId);
+  account.set("note", note);
+  await account.save();
+  return account.id;
+}
 
-      const accountObj = new AV.Object("accounts");
-
-      accountObj.set("username", data.username);
-
-      accountObj.set("password", data.password);
-
-      accountObj.set("parentId", website.id);
-
-      await accountObj.save();
-
-      return accountObj.toJSON();
-    }
-  },
-
-  // 删除账号
-  deleteAccount: async (id) => {
-    const account = AV.Object.createWithoutData("accounts", id);
-    await account.destroy();
-    return id;
-  },
-};
+export async function deleteAccount(accountId: string) {
+  const account = AV.Object.createWithoutData("Accounts", accountId);
+  await account.destroy();
+  return accountId;
+}

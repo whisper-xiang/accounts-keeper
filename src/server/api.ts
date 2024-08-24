@@ -1,4 +1,4 @@
-import AV from "./leancloud-config";
+import AV from "./leanCloud-config";
 
 export default {
   // 获取所有账号

@@ -1,13 +1,17 @@
 export interface AccountItem {
   objectId?: string;
-  account: string;
+  username: string;
   password: string;
   remark?: string;
   isEditing?: boolean;
+  note?: string;
 }
 
 export interface WebsiteItem {
   objectId?: string;
-  name: string;
-  children: AccountItem[];
+  url: string;
+  accountCount: number;
+  children?: AccountItem[];
+  icon?: string;
+  note?: string;
 }
