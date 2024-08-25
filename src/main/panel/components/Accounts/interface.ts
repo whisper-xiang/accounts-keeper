@@ -1,5 +1,5 @@
 export interface AccountItem {
-  objectId?: string;
+  objectId: string;
   username: string;
   password: string;
   remark?: string;
@@ -14,4 +14,10 @@ export interface WebsiteItem {
   children?: AccountItem[];
   icon?: string;
   note?: string;
+}
+
+export enum CreateModalType {
+  CreateWebsite = "createWebsite",
+  UpdateWebsite = "updateWebsite",
+  CreateAccount = "createAccount",
 }

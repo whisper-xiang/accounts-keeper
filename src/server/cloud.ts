@@ -136,13 +136,6 @@ export async function fetchWebsiteById(websiteId: string) {
   }
 }
 
-export async function fetchAccounts(websiteId: string) {
-  const accountsQuery = new AV.Query("Accounts");
-  accountsQuery.equalTo("belong", websiteId);
-  const accounts = await accountsQuery.find();
-  return accounts.map((account) => account.toJSON());
-}
-
 export async function addWebsite(url: string, note: string) {
   const website = new AV.Object("Websites");
   website.set("url", url);
@@ -154,7 +147,29 @@ export async function addWebsite(url: string, note: string) {
 export async function deleteWebsite(websiteId: string) {
   const website = AV.Object.createWithoutData("Websites", websiteId);
   await website.destroy();
+
+  // 删除与此网站相关的 accounts
+  const accountQuery = new AV.Query("Accounts");
+  accountQuery.equalTo("belong", websiteId);
+  const accounts = await accountQuery.find();
+  accounts.forEach((account) => account.destroy());
+
   return websiteId;
+}
+
+export async function updateWebsite(
+  websiteId: string,
+  url: string,
+  note?: string
+) {
+  if (!websiteId) {
+    throw new Error("Website ID is required.");
+  }
+  const website = AV.Object.createWithoutData("Websites", websiteId);
+  website.set("url", url);
+  website.set("note", note);
+  await website.save();
+  return website.id;
 }
 
 export async function addAccount(
@@ -163,6 +178,11 @@ export async function addAccount(
   password: string,
   note?: string
 ) {
+  if (!websiteId) {
+    throw new Error("Website ID is required.");
+  }
+  console.log("addAccount", websiteId, username, password, note);
+
   const account = new AV.Object("Accounts");
   account.set("username", username);
   account.set("password", password);
@@ -176,4 +196,19 @@ export async function deleteAccount(accountId: string) {
   const account = AV.Object.createWithoutData("Accounts", accountId);
   await account.destroy();
   return accountId;
+}
+
+export async function updateAccount(
+  accountId: string,
+  data: { username?: string; password?: string; note?: string }
+) {
+  if (!accountId) {
+    throw new Error("Account ID is required.");
+  }
+  const account = AV.Object.createWithoutData("Accounts", accountId);
+  account.set("username", data.username);
+  account.set("password", data.password);
+  account.set("note", data.note);
+  await account.save();
+  return account.id;
 }

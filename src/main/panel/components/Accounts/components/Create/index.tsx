@@ -20,10 +20,9 @@ import {
 import TextArea from "antd/es/input/TextArea";
 import { generateRandomPassword } from "~utils";
 import "./index.less";
-import {
-  addWebsite as addWebsiteApi,
-  addAccount as addAccountApi,
-} from "@/server/cloud";
+import { CreateModalType } from "../../interface";
+
+import { api } from "@/server";
 
 type FieldType = {
   site?: string;
@@ -32,34 +31,28 @@ type FieldType = {
   note?: string;
 };
 
-enum CreateType {
-  Website = "website",
-  Account = "account",
-}
-
 const CreateAccount = ({
   visible,
   onOk,
   onClose,
-  type = "website",
+  type = CreateModalType.CreateWebsite,
   siteValue,
   siteId,
 }: {
   visible: boolean;
   onOk: (values: FieldType) => void;
   onClose: () => void;
-  type: "account" | "website";
+  type: CreateModalType;
   siteValue?: string;
   siteId?: string;
 }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const [password, setPassword] = useState("");
-  const [site, setSite] = useState("");
   const [loading, setLoading] = useState(false); // Loading state for the entire Modal
 
   const addWebsite = (site: string, note: string) => {
-    return addWebsiteApi(site, note);
+    return api.addWebsite(site, note);
   };
 
   const addAccount = (
@@ -68,7 +61,8 @@ const CreateAccount = ({
     password: string,
     note?: string
   ) => {
-    addAccountApi(websiteId, username, password, note)
+    api
+      .addAccount(websiteId, username, password, note)
       .then(() => {
         messageApi.open({
           type: "success",
@@ -90,7 +84,7 @@ const CreateAccount = ({
       .then(async (values) => {
         const { site, username, password, note } = values;
 
-        if (type === CreateType.Website) {
+        if (type === CreateModalType.CreateWebsite) {
           const websiteId = await addWebsite(site, note);
 
           if (username && password) {
@@ -98,17 +92,26 @@ const CreateAccount = ({
           } else {
             messageApi.open({
               type: "success",
-              content: "Website created successfully!",
+              content: "CreateWebsite created successfully!",
             });
           }
-        } else {
+        } else if (type === CreateModalType.CreateAccount) {
           if (siteId) {
-            addAccount(siteId, username, password);
+            addAccount(siteId, username, password, note);
+          }
+        } else if (type === CreateModalType.UpdateWebsite) {
+          if (siteId) {
+            await api.updateWebsite(siteId, site, note);
+            messageApi.open({
+              type: "success",
+              content: "Website updated successfully!",
+            });
           }
         }
         onOk(values);
-        onClose();
         form.resetFields();
+        setPassword("");
+        onClose();
       })
       .finally(() => {
         setLoading(false);
@@ -145,15 +148,24 @@ const CreateAccount = ({
   };
 
   useEffect(() => {
+    if (!visible) {
+      return;
+    }
     if (siteValue) {
       form.setFieldsValue({ site: siteValue });
-      setSite(siteValue); // Update the site state
     }
-  }, []);
+  }, [visible, siteValue, form]);
 
   return (
     <Modal
-      title="Create website"
+      getContainer={false}
+      title={
+        type === CreateModalType.CreateWebsite
+          ? "Create a new website"
+          : type === CreateModalType.CreateAccount
+          ? `Create a new account for ${siteValue}`
+          : `Update website: ${siteValue}`
+      }
       open={visible}
       onOk={onOkHandler}
       onCancel={onClose}
@@ -183,7 +195,10 @@ const CreateAccount = ({
             label="Site"
             name="site"
             rules={
-              type === "website"
+              [
+                CreateModalType.CreateWebsite,
+                CreateModalType.UpdateWebsite,
+              ].includes(type)
                 ? [{ required: true, message: "Please input your website!" }]
                 : [
                     {
@@ -194,9 +209,9 @@ const CreateAccount = ({
           >
             <Space.Compact style={{ width: "100%" }}>
               <Input
-                disabled={type === "account"}
+                defaultValue={siteValue}
+                disabled={type === CreateModalType.CreateAccount}
                 placeholder="input website!"
-                defaultValue={site}
                 prefix={<GlobalOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
               />
               <Tooltip title="copy to clipboard">
@@ -211,79 +226,104 @@ const CreateAccount = ({
               </Tooltip>
             </Space.Compact>
           </Form.Item>
+          {type !== CreateModalType.UpdateWebsite && (
+            <>
+              <Form.Item<FieldType>
+                label="Username"
+                name="username"
+                rules={
+                  type === CreateModalType.CreateAccount
+                    ? [
+                        {
+                          required: true,
+                          message: "Please input your username!",
+                        },
+                      ]
+                    : [
+                        {
+                          required: false,
+                        },
+                      ]
+                }
+              >
+                <Space.Compact style={{ width: "100%" }}>
+                  <Input
+                    placeholder="input username"
+                    prefix={
+                      <UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />
+                    }
+                  />
+                  <Tooltip title="copy to clipboard">
+                    <Button
+                      type="default"
+                      onClick={() => {
+                        copyTextToClipboard(form.getFieldValue("username"));
+                      }}
+                      tabIndex={-1}
+                    >
+                      <CopyOutlined />
+                    </Button>
+                  </Tooltip>
+                </Space.Compact>
+              </Form.Item>
+              <Form.Item<FieldType>
+                label="Password"
+                name="password"
+                rules={
+                  type === CreateModalType.CreateAccount
+                    ? [
+                        {
+                          required: true,
+                          message: "Please input your password!",
+                        },
+                      ]
+                    : [
+                        {
+                          required: false,
+                        },
+                      ]
+                }
+              >
+                <Space.Compact style={{ width: "100%" }}>
+                  <Input.Password
+                    placeholder="input password"
+                    prefix={
+                      <LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />
+                    }
+                    value={password} // Bind the password state to the input value
+                    onChange={(e) => setPassword(e.target.value)} // Ensure changes to the input update the state
+                  />
+                  <Tooltip title="password generator">
+                    <Button type="default" onClick={handlePasswordGeneration}>
+                      <JavaScriptOutlined />
+                    </Button>
+                  </Tooltip>
+                  <Tooltip title="copy to clipboard">
+                    <Button
+                      type="default"
+                      tabIndex={-1}
+                      onClick={() => {
+                        copyTextToClipboard(form.getFieldValue("password"));
+                      }}
+                    >
+                      <CopyOutlined />
+                    </Button>
+                  </Tooltip>
+                </Space.Compact>
+              </Form.Item>
+              Make sure you're saving your current password for this site
+              <Divider dashed />
+            </>
+          )}
           <Form.Item<FieldType>
-            label="Username"
-            name="username"
-            rules={
-              type === "account"
-                ? [{ required: true, message: "Please input your username!" }]
-                : [
-                    {
-                      required: false,
-                    },
-                  ]
+            label={
+              [
+                CreateModalType.CreateWebsite,
+                CreateModalType.UpdateWebsite,
+              ].includes(type)
+                ? "Note"
+                : "Site note"
             }
-          >
-            <Space.Compact style={{ width: "100%" }}>
-              <Input
-                placeholder="input username"
-                prefix={<UserOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
-              />
-              <Tooltip title="copy to clipboard">
-                <Button
-                  type="default"
-                  onClick={() => {
-                    copyTextToClipboard(form.getFieldValue("username"));
-                  }}
-                  tabIndex={-1}
-                >
-                  <CopyOutlined />
-                </Button>
-              </Tooltip>
-            </Space.Compact>
-          </Form.Item>
-          <Form.Item<FieldType>
-            label="Password"
-            name="password"
-            rules={
-              type === "account"
-                ? [{ required: true, message: "Please input your password!" }]
-                : [
-                    {
-                      required: false,
-                    },
-                  ]
-            }
-          >
-            <Space.Compact style={{ width: "100%" }}>
-              <Input.Password
-                placeholder="input password"
-                prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
-                value={password} // Bind the password state to the input value
-                onChange={(e) => setPassword(e.target.value)} // Ensure changes to the input update the state
-              />
-              <Tooltip title="password generator">
-                <Button type="default" onClick={handlePasswordGeneration}>
-                  <JavaScriptOutlined />
-                </Button>
-              </Tooltip>
-              <Tooltip title="copy to clipboard">
-                <Button
-                  type="default"
-                  tabIndex={-1}
-                  onClick={() => {
-                    copyTextToClipboard(form.getFieldValue("password"));
-                  }}
-                >
-                  <CopyOutlined />
-                </Button>
-              </Tooltip>
-            </Space.Compact>
-          </Form.Item>
-          Make sure you're saving your current password for this site
-          <Divider dashed />
-          <Form.Item<FieldType>
-            label={type === "account" ? "Note" : "Site note"}
             name="note"
           >
             <TextArea placeholder="input note" allowClear />
