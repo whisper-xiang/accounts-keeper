@@ -1,21 +1,26 @@
 import { Card, Divider, Form, Input, Layout, Radio, message } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./index.less";
 import { CloseOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
+import {
+  getSettingsConfigs,
+  updateSettingConfigs,
+} from "../../../../server/configCache";
+import { SettingsConfigs, StorageMode } from "./types";
 
 const Settings = () => {
-  const [storageMode, setStorageMode] = useState("cloud"); // 确保默认值与 initialValues 中的值匹配
+  const [storageMode, setStorageMode] = useState(StorageMode.Cloud);
   const [isEdit, setIsEdit] = useState(false);
-  const [form] = Form.useForm(); // 使用 form 实例来管理表单状态
+  const [form] = Form.useForm();
   const { Header } = Layout;
   const [messageApi, messageContextHolder] = message.useMessage();
 
-  const [initialValues, setInitialValues] = useState({
-    storageMode: "cloud",
-    appId: "",
-    appKey: "",
-    serverUrl: "",
-    master: "",
+  const [initialValues, setInitialValues] = useState<SettingsConfigs>({
+    storageMode: StorageMode.Cloud,
+    APP_ID: "",
+    APP_KEY: "",
+    SERVER_URL: "",
+    masterPassword: "",
   });
 
   const onFormLayoutChange = (changedValues) => {
@@ -26,27 +31,21 @@ const Settings = () => {
 
   const onCancelEdit = () => {
     form.setFieldsValue(initialValues); // 重置表单数据到初始值
-    setIsEdit(false); // 退出编辑状态
+    setStorageMode(initialValues.storageMode); // 重置 storageMode 状态
+    setIsEdit(false);
   };
 
   const handleEdit = () => {
-    setIsEdit(true); // 进入编辑状态
+    setIsEdit(true);
   };
 
   const onSave = async () => {
     form.validateFields().then(async (values) => {
       // 发送保存请求到接口
-      await saveSettings(values);
+      await updateSettingConfigs(values);
       messageApi.success("Settings saved successfully!");
-      setInitialValues(values); // 更新初始值
-      setIsEdit(false); // 退出编辑状态
-    }); // 校验并获取表单数据
-  };
-
-  const saveSettings = async (values) => {
-    // 模拟 API 调用
-    return new Promise((resolve) => {
-      setTimeout(() => resolve(values), 1000);
+      setInitialValues(values);
+      setIsEdit(false);
     });
   };
 
@@ -57,6 +56,16 @@ const Settings = () => {
       ]
     : [<EditOutlined key="edit" onClick={handleEdit} />];
 
+  useEffect(() => {
+    getSettingsConfigs().then((configs) => {
+      if (configs) {
+        setInitialValues(configs); // 更新 state 中的初始值
+        form.setFieldsValue(configs); // 手动更新表单值
+        setStorageMode(configs.storageMode);
+      }
+    });
+  }, []);
+
   return (
     <div className="settings-container">
       <Header className="header">
@@ -65,20 +74,47 @@ const Settings = () => {
       <Card bordered={false} actions={actions}>
         <Form
           form={form}
-          labelCol={{ span: 8 }}
-          wrapperCol={{ span: 14 }}
+          labelCol={{ span: 6 }}
+          wrapperCol={{ span: 18 }}
           layout="horizontal"
           onValuesChange={onFormLayoutChange}
           initialValues={initialValues} // 设置初始值
         >
-          <Form.Item label="storage mode" name="storageMode">
+          <strong>
+            Note: All of the Settings below will be stored only in the chrome
+            cache!
+          </strong>
+          <Divider dashed />
+          <Form.Item
+            label="Master password"
+            name="masterPassword"
+            rules={[
+              { required: true, message: "Please input master password!" },
+            ]}
+          >
+            <Input.Password disabled={!isEdit} />
+          </Form.Item>
+          All passwords will be encrypted by the master password
+          <Divider dashed />
+          <Form.Item label="Storage mode" name="storageMode">
             <Radio.Group disabled={!isEdit}>
-              <Radio.Button value="cloud">cloud</Radio.Button>
-              <Radio.Button value="storage">storage</Radio.Button>
-              <Radio.Button value="sync">sync</Radio.Button>
+              <Radio.Button value={StorageMode.Cloud}>cloud</Radio.Button>
+              <Radio.Button value={StorageMode.ChromeStorage}>
+                storage
+              </Radio.Button>
+              <Radio.Button value={StorageMode.ChromeSync}>sync</Radio.Button>
             </Radio.Group>
           </Form.Item>
-          {storageMode === "cloud" && (
+          <small className="mb-2 d-block">
+            {storageMode === StorageMode.Cloud
+              ? "All passwords will be encrypted and stored in the cloud."
+              : storageMode === StorageMode.ChromeStorage
+              ? "All passwords will be encrypted and stored in the local storage."
+              : storageMode === StorageMode.ChromeSync
+              ? "All passwords will be encrypted and stored in the sync storage."
+              : ""}
+          </small>
+          {storageMode === StorageMode.Cloud && (
             <>
               <Form.Item
                 label="APP_ID"
@@ -99,18 +135,6 @@ const Settings = () => {
               </Form.Item>
             </>
           )}
-          <Divider dashed />
-          <Form.Item
-            label="master password"
-            name="master"
-            rules={[
-              { required: true, message: "Please input master password!" },
-            ]}
-          >
-            <Input disabled={!isEdit} />
-          </Form.Item>
-          All passwords will be encrypted by the master password
-          <Divider dashed />
         </Form>
       </Card>
       {messageContextHolder}

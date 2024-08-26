@@ -12,6 +12,12 @@ import {
 } from "antd";
 import { ReloadOutlined, CopyOutlined } from "@ant-design/icons";
 import "./index.less";
+import {
+  getPwdGeneratorCache,
+  updatePwdGeneratorCache,
+} from "../../../../server/configCache";
+import { generatePassword } from "./utils";
+// import
 
 const PasswordGenerator: React.FC = () => {
   const { Header } = Layout;
@@ -21,23 +27,6 @@ const PasswordGenerator: React.FC = () => {
   const [includeSymbols, setIncludeSymbols] = useState<boolean>(true);
   const [messageApi, messageContextHolder] = message.useMessage();
 
-  const generatePassword = () => {
-    const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const numbers = "0123456789";
-    const symbols = "!@#$%^&*()_+~`|}{[]:;?><,./-=";
-    let characters = letters;
-
-    if (includeNumbers) characters += numbers;
-    if (includeSymbols) characters += symbols;
-
-    let generatedPassword = "";
-    for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(Math.random() * characters.length);
-      generatedPassword += characters[randomIndex];
-    }
-    setPassword(generatedPassword);
-  };
-
   const copyToClipboard = () => {
     navigator.clipboard.writeText(password).then(() => {
       messageApi.success("Password copied to clipboard!");
@@ -45,7 +34,22 @@ const PasswordGenerator: React.FC = () => {
   };
 
   useEffect(() => {
-    generatePassword();
+    getPwdGeneratorCache().then((configs) => {
+      if (configs) {
+        setLength(configs.length);
+        setIncludeNumbers(configs.includeNumbers);
+        setIncludeSymbols(configs.includeSymbols);
+      } else {
+        updatePwdGeneratorCache({
+          length: 24,
+          includeNumbers: true,
+          includeSymbols: true,
+        });
+      }
+    });
+    generatePassword().then((password) => {
+      setPassword(password);
+    });
   }, []);
 
   return (
@@ -55,15 +59,38 @@ const PasswordGenerator: React.FC = () => {
       </Header>
       <Form layout="vertical" className="form-container">
         <Form.Item label="Password Length">
-          <Slider min={6} max={30} value={length} onChange={setLength} />
+          <Slider
+            min={6}
+            max={30}
+            value={length}
+            onChange={async (value) => {
+              await updatePwdGeneratorCache({ length: value });
+              setLength(value);
+              setPassword(await generatePassword());
+            }}
+          />
         </Form.Item>
 
         <Form.Item label="Include Numbers">
-          <Switch checked={includeNumbers} onChange={setIncludeNumbers} />
+          <Switch
+            checked={includeNumbers}
+            onChange={async (value) => {
+              await updatePwdGeneratorCache({ includeNumbers: value });
+              setIncludeNumbers(value);
+              setPassword(await generatePassword());
+            }}
+          />
         </Form.Item>
 
         <Form.Item label="Include Symbols">
-          <Switch checked={includeSymbols} onChange={setIncludeSymbols} />
+          <Switch
+            checked={includeSymbols}
+            onChange={async (value) => {
+              await updatePwdGeneratorCache({ includeSymbols: value });
+              setIncludeSymbols(value);
+              setPassword(await generatePassword());
+            }}
+          />
         </Form.Item>
 
         <Form.Item label="Generated Password">
@@ -72,7 +99,7 @@ const PasswordGenerator: React.FC = () => {
             <Tooltip title="Refresh">
               <Button
                 icon={<ReloadOutlined />}
-                onClick={generatePassword}
+                onClick={async () => setPassword(await generatePassword())}
                 type="primary"
               />
             </Tooltip>

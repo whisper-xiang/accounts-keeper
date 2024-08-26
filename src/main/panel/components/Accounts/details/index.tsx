@@ -206,6 +206,11 @@ const Details: React.FC = () => {
     });
   };
 
+  const createAccount = () => {
+    setCreateModalType(CreateModalType.CreateAccount);
+    setVisible(true);
+  };
+
   useEffect(() => {
     getAccountList();
   }, []);
@@ -220,7 +225,7 @@ const Details: React.FC = () => {
           </h1>
           <div>
             <FileAddOutlined
-              onClick={() => setVisible(true)}
+              onClick={createAccount}
               className="ml-2 header-button"
               type="primary"
             />

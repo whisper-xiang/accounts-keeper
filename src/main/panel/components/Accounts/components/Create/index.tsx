@@ -42,7 +42,7 @@ const CreateAccount = ({
   visible: boolean;
   onOk: (values: FieldType) => void;
   onClose: () => void;
-  type: CreateModalType;
+  type?: CreateModalType;
   siteValue?: string;
   siteId?: string;
 }) => {

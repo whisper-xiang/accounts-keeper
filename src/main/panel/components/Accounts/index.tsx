@@ -46,7 +46,6 @@ const Accounts = () => {
         <AccountsMain list={filteredList} />
       </Content>
       <CreateSiteModal
-        type="website"
         visible={visible}
         onClose={() => setVisible(false)}
         onOk={() => getWebsiteList()}
