@@ -7,7 +7,7 @@ import { WebsiteItem } from "../../interface";
 const AccountsMain = ({ list }: { list: WebsiteItem[] | undefined }) => {
   return (
     <List
-      className="accounts-main-list mt-4"
+      className="accounts-main-list"
       loading={!list}
       itemLayout="horizontal"
       dataSource={list}

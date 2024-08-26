@@ -11,6 +11,9 @@ import {
   ExclamationCircleFilled,
   LockOutlined,
   JavaScriptOutlined,
+  LeftOutlined,
+  EllipsisOutlined,
+  PlusOutlined,
 } from "@ant-design/icons";
 import {
   Avatar,
@@ -24,6 +27,8 @@ import {
   Modal,
   message,
   Spin,
+  Popover,
+  Empty,
 } from "antd";
 import "./index.less";
 import CreateSiteModal from "../components/Create";
@@ -41,6 +46,7 @@ const Details: React.FC = () => {
   const { id: websiteId } = useParams();
   const [messageApi, messageContextHolder] = message.useMessage();
   const { TextArea } = Input;
+  const [hovered, setHovered] = useState(false);
   const [createModalType, setCreateModalType] = useState<CreateModalType>(
     CreateModalType.CreateWebsite
   );
@@ -172,6 +178,7 @@ const Details: React.FC = () => {
   };
 
   const editWebsite = () => {
+    setHovered(false);
     setCreateModalType(CreateModalType.UpdateWebsite);
     setVisible(true);
   };
@@ -207,6 +214,7 @@ const Details: React.FC = () => {
   };
 
   const createAccount = () => {
+    setHovered(false);
     setCreateModalType(CreateModalType.CreateAccount);
     setVisible(true);
   };
@@ -215,187 +223,227 @@ const Details: React.FC = () => {
     getAccountList();
   }, []);
 
+  const headerBtns = () => (
+    <div className="header-button-container">
+      <Button
+        type="default"
+        className="ml-2 header-button"
+        onClick={createAccount}
+        icon={<FileAddOutlined />}
+      ></Button>
+      <Button
+        type="default"
+        className="ml-2 header-button"
+        onClick={editWebsite}
+        icon={<EditOutlined />}
+      ></Button>
+      <Button
+        type="default"
+        className="ml-2 header-button"
+        onClick={removeWebsite}
+        icon={<DeleteOutlined />}
+      ></Button>{" "}
+    </div>
+  );
+
   return (
     <div className="accounts-details-container">
       <Spin spinning={loading}>
         <header>
-          <h1>
-            <ArrowLeftOutlined onClick={() => navigate(-1)} />
+          <h1 onClick={() => navigate(-1)} className="cursor-pointer">
+            <LeftOutlined />
             <span className="ml-2">{site}</span>
           </h1>
           <div>
-            <FileAddOutlined
-              onClick={createAccount}
-              className="ml-2 header-button"
-              type="primary"
-            />
-            <EditOutlined
-              onClick={editWebsite}
-              className="ml-2 header-button"
-              type="primary"
-            />
-            <DeleteOutlined
-              onClick={removeWebsite}
-              className="ml-2 header-button"
-              type="primary"
-            />
+            <Popover
+              content={headerBtns}
+              open={hovered}
+              trigger="hover"
+              onOpenChange={(v) => setHovered(v)}
+            >
+              <EllipsisOutlined
+                className="transform rotate-90"
+                onClick={() => setHovered(true)}
+              />
+            </Popover>
           </div>
         </header>
 
-        {list.map((item, index) => {
-          formRefs.current[index] = formRefs.current[index] || null;
+        {list.length === 0 ? (
+          <div className="empty-container">
+            <Empty description='no account found, click "+" button to create'>
+              <Button
+                type="default"
+                className="ml-2 header-button"
+                onClick={createAccount}
+                icon={<PlusOutlined />}
+              >
+                {" "}
+                create account
+              </Button>
+            </Empty>
+          </div>
+        ) : (
+          list.map((item, index) => {
+            formRefs.current[index] = formRefs.current[index] || null;
 
-          const actions: React.ReactNode[] = item.isEdit
-            ? [
-                <SaveOutlined
-                  key="save"
-                  onClick={() => formRefs.current[index]?.submit()}
-                />,
-                <CloseOutlined
-                  key="cancel"
-                  onClick={() => onCancelEdit(index)}
-                />,
-              ]
-            : [
-                <EditOutlined
-                  key="edit"
-                  onClick={() => handleEdit(index, item)}
-                />,
-                <DeleteOutlined
-                  key="delete"
-                  onClick={() => handleDelete(item.objectId)}
-                />,
-              ];
+            const actions: React.ReactNode[] = item.isEdit
+              ? [
+                  <SaveOutlined
+                    key="save"
+                    onClick={() => formRefs.current[index]?.submit()}
+                  />,
+                  <CloseOutlined
+                    key="cancel"
+                    onClick={() => onCancelEdit(index)}
+                  />,
+                ]
+              : [
+                  <EditOutlined
+                    key="edit"
+                    onClick={() => handleEdit(index, item)}
+                  />,
+                  <DeleteOutlined
+                    key="delete"
+                    onClick={() => handleDelete(item.objectId)}
+                  />,
+                ];
 
-          return (
-            <Card
-              loading={loading}
-              actions={actions}
-              className="accounts-details-card"
-              key={item.objectId}
-            >
-              <Card.Meta
-                avatar={
-                  <Avatar src="https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png" />
-                }
-                description={
-                  <Form
-                    ref={(el) =>
-                      (formRefs.current[index] =
-                        el as FormInstance<FormAccountType> | null)
-                    }
-                    name={`form_${item.objectId}`}
-                    labelCol={{ span: 3 }}
-                    wrapperCol={{ span: 21 }}
-                    layout="vertical"
-                    onFinish={(values) =>
-                      onFinish(item.objectId, values, index)
-                    }
-                  >
-                    <Form.Item<FormAccountType>
-                      label="Username"
-                      name="username"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please input your password!",
-                        },
-                      ]}
+            return (
+              <Card
+                loading={loading}
+                actions={actions}
+                className="accounts-details-card"
+                key={item.objectId}
+              >
+                <Card.Meta
+                  avatar={
+                    <Avatar src="https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png" />
+                  }
+                  description={
+                    <Form
+                      ref={(el) =>
+                        (formRefs.current[index] =
+                          el as FormInstance<FormAccountType> | null)
+                      }
+                      name={`form_${item.objectId}`}
+                      labelCol={{ span: 3 }}
+                      wrapperCol={{ span: 21 }}
+                      layout="vertical"
+                      onFinish={(values) =>
+                        onFinish(item.objectId, values, index)
+                      }
                     >
-                      <Space.Compact style={{ width: "100%" }}>
-                        <Input
-                          defaultValue={item.username}
-                          placeholder="input username"
-                          disabled={!item.isEdit}
-                          prefix={
-                            <UserOutlined
-                              style={{ color: "rgba(0,0,0,.25)" }}
-                            />
-                          }
-                        />
-                        <Tooltip title="copy to clipboard">
-                          <Button
-                            type="default"
-                            onClick={() => {
-                              copyTextToClipboard(
-                                formRefs.current[index]?.getFieldValue(
-                                  "username"
-                                ) || item.username
-                              );
-                            }}
-                          >
-                            <CopyOutlined />
-                          </Button>
-                        </Tooltip>
-                      </Space.Compact>
-                    </Form.Item>
-
-                    <Form.Item<FormAccountType>
-                      label="Password"
-                      name="password"
-                      rules={[
-                        {
-                          required: true,
-                          message: "Please input your password!",
-                        },
-                      ]}
-                    >
-                      <Space.Compact style={{ width: "100%" }}>
-                        <Input.Password
-                          placeholder="input website!"
-                          disabled={!item.isEdit}
-                          visibilityToggle={{
-                            visible: item.passwordVisible,
-                          }}
-                          value={
-                            formRefs.current[index]?.getFieldValue(
-                              "password"
-                            ) || item.password
-                          }
-                          prefix={
-                            <LockOutlined
-                              style={{ color: "rgba(0,0,0,.25)" }}
-                            />
-                          }
-                        />
-                        <Tooltip title="password generator">
-                          <Button
-                            type="default"
+                      <Form.Item<FormAccountType>
+                        label="Username"
+                        name="username"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please input your password!",
+                          },
+                        ]}
+                      >
+                        <Space.Compact style={{ width: "100%" }}>
+                          <Input
+                            defaultValue={item.username}
+                            placeholder="input username"
                             disabled={!item.isEdit}
-                            onClick={() => handlePasswordGeneration(index)}
-                          >
-                            <JavaScriptOutlined />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip title="copy to clipboard">
-                          <Button
-                            type="default"
-                            onClick={() => {
-                              copyTextToClipboard(
-                                formRefs.current[index]?.getFieldValue(
-                                  "password"
-                                ) || item.password
-                              );
-                            }}
-                          >
-                            <CopyOutlined />
-                          </Button>
-                        </Tooltip>
-                      </Space.Compact>
-                    </Form.Item>
+                            prefix={
+                              <UserOutlined
+                                style={{ color: "rgba(0,0,0,.25)" }}
+                              />
+                            }
+                          />
+                          <Tooltip title="copy to clipboard">
+                            <Button
+                              type="default"
+                              onClick={() => {
+                                copyTextToClipboard(
+                                  formRefs.current[index]?.getFieldValue(
+                                    "username"
+                                  ) || item.username
+                                );
+                              }}
+                            >
+                              <CopyOutlined />
+                            </Button>
+                          </Tooltip>
+                        </Space.Compact>
+                      </Form.Item>
 
-                    <Form.Item<FormAccountType> label="Note" name="note">
-                      <TextArea
-                        disabled={!item.isEdit}
-                        defaultValue={item.note}
-                      />
-                    </Form.Item>
-                  </Form>
-                }
-              />
-            </Card>
-          );
-        })}
+                      <Form.Item<FormAccountType>
+                        label="Password"
+                        name="password"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Please input your password!",
+                          },
+                        ]}
+                      >
+                        <Space.Compact style={{ width: "100%" }}>
+                          <Input.Password
+                            placeholder="input website!"
+                            disabled={!item.isEdit}
+                            visibilityToggle={{
+                              visible: item.passwordVisible,
+                            }}
+                            defaultValue={
+                              formRefs.current[index]?.getFieldValue(
+                                "password"
+                              ) || item.password
+                            }
+                            prefix={
+                              <LockOutlined
+                                style={{ color: "rgba(0,0,0,.25)" }}
+                              />
+                            }
+                          />
+                          <Tooltip title="password generator">
+                            <Button
+                              type="default"
+                              disabled={!item.isEdit}
+                              onClick={() => handlePasswordGeneration(index)}
+                            >
+                              <JavaScriptOutlined />
+                            </Button>
+                          </Tooltip>
+                          <Tooltip title="copy to clipboard">
+                            <Button
+                              type="default"
+                              onClick={() => {
+                                copyTextToClipboard(
+                                  formRefs.current[index]?.getFieldValue(
+                                    "password"
+                                  ) || item.password
+                                );
+                              }}
+                            >
+                              <CopyOutlined />
+                            </Button>
+                          </Tooltip>
+                        </Space.Compact>
+                      </Form.Item>
+
+                      <Form.Item<FormAccountType>
+                        label="Note"
+                        name="note"
+                        initialValue={item.note}
+                      >
+                        <TextArea
+                          disabled={!item.isEdit}
+                          // defaultValue={item.note}
+                        />
+                      </Form.Item>
+                    </Form>
+                  }
+                />
+              </Card>
+            );
+          })
+        )}
+
         <CreateSiteModal
           visible={visible}
           type={createModalType}

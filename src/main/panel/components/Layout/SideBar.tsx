@@ -53,7 +53,7 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
         <div
           key={item.key}
           className={`flex flex-col items-center py-2 cursor-pointer ${
-            activeIndex === index ? "bg-color-primary-bg" : ""
+            activeIndex === index ? "active-sidebar-item" : "sidebar-item"
           }`}
           onClick={() => handleItemClick(item, index)}
         >

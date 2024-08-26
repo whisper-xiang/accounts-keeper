@@ -4,17 +4,40 @@
   width: 100vw;
   height: 100vh;
   display: flex;
+  background: url("../../../../public/bg1.png");
+  background-size: contain;
+  background-position: 0;
   .article {
     flex: 1;
     background: rgba(22, 106, 106, 0.1);
-    // 166A6A
     .header {
       height: 56px;
-      background: #7ab1bb;
     }
   }
   .aside {
-    background-color: #7ab1bb;
+    background: linear-gradient(
+      to bottom,
+      rgba(200, 193, 157, 1),
+      rgba(200, 193, 157, 0.5)
+    );
+    .active-sidebar-item {
+      width: 100%;
+      background: linear-gradient(
+        to right,
+        rgba(37, 131, 131, 0.2),
+        rgba(37, 131, 131, 0.8) ;
+      );
+    }
+    .sidebar-item {
+      width: 100%;
+      &:hover {
+        background: linear-gradient(
+          to right,
+          rgba(37, 131, 131, 0.2),
+          rgba(37, 131, 131, 0.8) ;
+        );
+      }
+    }
   }
   main {
     display: flex;

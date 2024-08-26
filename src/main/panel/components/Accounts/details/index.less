@@ -10,9 +10,13 @@
     align-items: center;
     padding: 0 20px;
     justify-content: space-between;
+    background: linear-gradient(
+      to right,
+      rgba(37, 131, 131, 0.8),
+      rgba(37, 131, 131, 0.2)
+    );
   }
   .accounts-details-card {
-    // background: rgba(163, 221, 106, 0.2);
     margin-bottom: 8px;
     .ant-form-item {
       margin-bottom: 8px;
@@ -20,6 +24,24 @@
 
     .ant-form-item-label {
       padding: 0;
+    }
+  }
+  .empty-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 56px);
+  }
+}
+.header-button-container {
+  .header-button {
+    background: transparent;
+    color: rgb(193, 161, 85);
+    border-color: rgba(193, 161, 85, 0.8);
+    &:hover {
+      border-color: rgba(193, 161, 85, 1) !important;
+      background: rgba(193, 161, 85, 0.3) !important;
+      color: rgb(193, 161, 85) !important;
     }
   }
 }

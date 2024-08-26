@@ -1,5 +1,5 @@
 import { Button, Input } from "antd";
-import { FileAddOutlined } from "@ant-design/icons";
+import { PlusOutlined } from "@ant-design/icons";
 import "./index.less";
 
 const AccountsHeader = ({ onChange, setVisible }) => {
@@ -12,11 +12,11 @@ const AccountsHeader = ({ onChange, setVisible }) => {
         className="header-input"
       />
       <Button
-        icon={<FileAddOutlined />}
+        icon={<PlusOutlined />}
         onClick={() => setVisible(true)}
         className="ml-2 header-button"
-        type="primary"
-      />
+        type="default"
+      ></Button>
     </div>
   );
 };

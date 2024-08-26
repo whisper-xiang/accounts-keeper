@@ -17,7 +17,6 @@ import {
   updatePwdGeneratorCache,
 } from "../../../../server/configCache";
 import { generatePassword } from "./utils";
-// import
 
 const PasswordGenerator: React.FC = () => {
   const { Header } = Layout;
@@ -28,29 +27,39 @@ const PasswordGenerator: React.FC = () => {
   const [messageApi, messageContextHolder] = message.useMessage();
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(password).then(() => {
-      messageApi.success("Password copied to clipboard!");
-    });
+    navigator.clipboard
+      .writeText(password)
+      .then(() => {
+        messageApi.success("Password copied to clipboard!");
+      })
+      .catch((err) => {
+        messageApi.error("Failed to copy password: " + err);
+      });
   };
 
   useEffect(() => {
-    getPwdGeneratorCache().then((configs) => {
+    const fetchData = async () => {
+      const configs = await getPwdGeneratorCache();
       if (configs) {
         setLength(configs.length);
         setIncludeNumbers(configs.includeNumbers);
         setIncludeSymbols(configs.includeSymbols);
       } else {
-        updatePwdGeneratorCache({
+        await updatePwdGeneratorCache({
           length: 24,
           includeNumbers: true,
           includeSymbols: true,
         });
       }
-    });
-    generatePassword().then((password) => {
-      setPassword(password);
-    });
+      setPassword(await generatePassword());
+    };
+
+    fetchData();
   }, []);
+
+  const handleGeneratePassword = async () => {
+    setPassword(await generatePassword());
+  };
 
   return (
     <div className="password-generator-container">
@@ -63,10 +72,9 @@ const PasswordGenerator: React.FC = () => {
             min={6}
             max={30}
             value={length}
-            onChange={async (value) => {
-              await updatePwdGeneratorCache({ length: value });
+            onChange={(value) => {
+              updatePwdGeneratorCache({ length: value });
               setLength(value);
-              setPassword(await generatePassword());
             }}
           />
         </Form.Item>
@@ -74,10 +82,9 @@ const PasswordGenerator: React.FC = () => {
         <Form.Item label="Include Numbers">
           <Switch
             checked={includeNumbers}
-            onChange={async (value) => {
-              await updatePwdGeneratorCache({ includeNumbers: value });
+            onChange={(value) => {
+              updatePwdGeneratorCache({ includeNumbers: value });
               setIncludeNumbers(value);
-              setPassword(await generatePassword());
             }}
           />
         </Form.Item>
@@ -85,10 +92,9 @@ const PasswordGenerator: React.FC = () => {
         <Form.Item label="Include Symbols">
           <Switch
             checked={includeSymbols}
-            onChange={async (value) => {
-              await updatePwdGeneratorCache({ includeSymbols: value });
+            onChange={(value) => {
+              updatePwdGeneratorCache({ includeSymbols: value });
               setIncludeSymbols(value);
-              setPassword(await generatePassword());
             }}
           />
         </Form.Item>
@@ -99,7 +105,7 @@ const PasswordGenerator: React.FC = () => {
             <Tooltip title="Refresh">
               <Button
                 icon={<ReloadOutlined />}
-                onClick={async () => setPassword(await generatePassword())}
+                onClick={handleGeneratePassword}
                 type="primary"
               />
             </Tooltip>

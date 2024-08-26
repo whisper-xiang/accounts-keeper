@@ -15,6 +15,7 @@ createRoot(document.getElementById("root")!).render(
             },
           },
           token: {
+            colorPrimary: "#1DA57A",
             // Seed Token，影响范围大
             // colorPrimary: "#00b96b",
             // borderRadius: 2,
