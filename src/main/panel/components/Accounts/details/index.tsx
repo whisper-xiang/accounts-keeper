@@ -1,9 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import {
-  ArrowLeftOutlined,
   CopyOutlined,
   EditOutlined,
-  FileAddOutlined,
   UserOutlined,
   SaveOutlined,
   CloseOutlined,
@@ -12,7 +10,6 @@ import {
   LockOutlined,
   JavaScriptOutlined,
   LeftOutlined,
-  EllipsisOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
 import {
@@ -27,7 +24,6 @@ import {
   Modal,
   message,
   Spin,
-  Popover,
   Empty,
 } from "antd";
 import "./index.less";
@@ -46,7 +42,6 @@ const Details: React.FC = () => {
   const { id: websiteId } = useParams();
   const [messageApi, messageContextHolder] = message.useMessage();
   const { TextArea } = Input;
-  const [hovered, setHovered] = useState(false);
   const [createModalType, setCreateModalType] = useState<CreateModalType>(
     CreateModalType.CreateWebsite
   );
@@ -55,14 +50,21 @@ const Details: React.FC = () => {
   interface FormAccountType extends AccountItem {
     isEdit?: boolean;
     passwordVisible?: boolean;
+    originalPassword?: string;
   }
 
   const getAccountList = async () => {
     setLoading(true); // Start loading
     try {
       const websiteDetail = await api.fetchWebsiteById(websiteId);
+      const initialList = websiteDetail.children.map(
+        (item: FormAccountType) => ({
+          ...item,
+          originalPassword: item.password, // 保存初始密码
+        })
+      );
       setSite(websiteDetail.url);
-      setList(websiteDetail.children);
+      setList(initialList);
     } catch (error) {
       console.error("Failed to fetch account list:", error);
     } finally {
@@ -97,6 +99,7 @@ const Details: React.FC = () => {
   const onCancelEdit = (index: number) => {
     const updatedList = [...list];
     formRefs.current[index]?.resetFields();
+    updatedList[index].password = updatedList[index].originalPassword as string;
     updatedList[index].isEdit = false;
     setList(updatedList);
   };
@@ -163,12 +166,16 @@ const Details: React.FC = () => {
   const handlePasswordGeneration = (index: number) => {
     const newPassword = generateRandomPassword();
     if (newPassword) {
+      // 通过 formRefs 设置表单值
       formRefs.current[index]?.setFieldsValue({
         password: newPassword,
       });
-      // const updatedList = [...list];
-      // updatedList[index].passwordVisible = true;
-      // setList(updatedList);
+
+      // 更新 list 中的密码可见状态
+      const updatedList = [...list];
+      updatedList[index].password = newPassword;
+      updatedList[index].passwordVisible = true;
+      setList(updatedList);
     } else {
       messageApi.open({
         type: "error",
@@ -177,44 +184,7 @@ const Details: React.FC = () => {
     }
   };
 
-  const editWebsite = () => {
-    setHovered(false);
-    setCreateModalType(CreateModalType.UpdateWebsite);
-    setVisible(true);
-  };
-
-  const removeWebsite = () => {
-    modal.confirm({
-      title: "Are you sure delete this website?",
-      icon: <ExclamationCircleFilled />,
-      content:
-        "Once deleted, the website and all its accounts cannot be recovered.",
-      okText: "Yes",
-      okType: "danger",
-      cancelText: "No",
-      onOk() {
-        setLoading(true); // Start loading for delete operation
-        api
-          .deleteWebsite(websiteId)
-          .then(() => {
-            messageApi.open({
-              type: "success",
-              content: "Website deleted successfully!",
-            });
-            navigate(-1);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
-      },
-      onCancel() {
-        console.log("Delete cancelled");
-      },
-    });
-  };
-
   const createAccount = () => {
-    setHovered(false);
     setCreateModalType(CreateModalType.CreateAccount);
     setVisible(true);
   };
@@ -223,28 +193,14 @@ const Details: React.FC = () => {
     getAccountList();
   }, []);
 
-  const headerBtns = () => (
-    <div className="header-button-container">
-      <Button
-        type="default"
-        className="ml-2 header-button"
-        onClick={createAccount}
-        icon={<FileAddOutlined />}
-      ></Button>
-      <Button
-        type="default"
-        className="ml-2 header-button"
-        onClick={editWebsite}
-        icon={<EditOutlined />}
-      ></Button>
-      <Button
-        type="default"
-        className="ml-2 header-button"
-        onClick={removeWebsite}
-        icon={<DeleteOutlined />}
-      ></Button>{" "}
-    </div>
-  );
+  const handlePasswordChange = (
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const updatedList = [...list];
+    updatedList[index].password = e.target.value;
+    setList(updatedList);
+  };
 
   return (
     <div className="accounts-details-container">
@@ -254,19 +210,13 @@ const Details: React.FC = () => {
             <LeftOutlined />
             <span className="ml-2">{site}</span>
           </h1>
-          <div>
-            <Popover
-              content={headerBtns}
-              open={hovered}
-              trigger="hover"
-              onOpenChange={(v) => setHovered(v)}
-            >
-              <EllipsisOutlined
-                className="transform rotate-90"
-                onClick={() => setHovered(true)}
-              />
-            </Popover>
-          </div>
+          <Button
+            type="default"
+            size="small"
+            className="mr-2 header-button"
+            onClick={createAccount}
+            icon={<PlusOutlined />}
+          ></Button>
         </header>
 
         {list.length === 0 ? (
@@ -384,16 +334,13 @@ const Details: React.FC = () => {
                       >
                         <Space.Compact style={{ width: "100%" }}>
                           <Input.Password
-                            placeholder="input website!"
+                            placeholder="input password"
                             disabled={!item.isEdit}
                             visibilityToggle={{
                               visible: item.passwordVisible,
                             }}
-                            defaultValue={
-                              formRefs.current[index]?.getFieldValue(
-                                "password"
-                              ) || item.password
-                            }
+                            value={item.password} // 绑定到状态中的密码字段
+                            onChange={(e) => handlePasswordChange(index, e)} // 更新状态
                             prefix={
                               <LockOutlined
                                 style={{ color: "rgba(0,0,0,.25)" }}
@@ -413,11 +360,7 @@ const Details: React.FC = () => {
                             <Button
                               type="default"
                               onClick={() => {
-                                copyTextToClipboard(
-                                  formRefs.current[index]?.getFieldValue(
-                                    "password"
-                                  ) || item.password
-                                );
+                                copyTextToClipboard(item.password);
                               }}
                             >
                               <CopyOutlined />

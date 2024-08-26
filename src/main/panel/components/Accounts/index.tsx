@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Layout } from "antd";
-import { WebsiteItem } from "./interface";
+import { Layout, Spin } from "antd";
+import { CreateModalType, WebsiteItem } from "./interface";
 import CreateSiteModal from "./components/Create";
 import AccountsHeader from "./components/AccountsHeader/index.tsx";
 import AccountsMain from "./components/AccountsMain/index.tsx";
@@ -13,6 +13,11 @@ const Accounts = () => {
   const [list, setList] = useState<WebsiteItem[]>();
   const [filteredList, setFilteredList] = useState<WebsiteItem[]>();
   const [visible, setVisible] = useState(false);
+  const [createModalType, setCreateModalType] = useState<CreateModalType>(
+    CreateModalType.CreateWebsite
+  );
+  const [activeWebsite, setActiveWebsite] = useState<WebsiteItem>();
+  const [loading, setLoading] = useState(true);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchText = e.target.value;
@@ -23,14 +28,21 @@ const Accounts = () => {
   };
 
   const getWebsiteList = async () => {
+    setLoading(true);
     try {
       const res = await fetchAndAssembleData();
-
       setList(res);
       setFilteredList(res);
+      setLoading(false);
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const openModal = (website: WebsiteItem, type: CreateModalType) => {
+    setVisible(true);
+    setCreateModalType(type);
+    setActiveWebsite(website);
   };
 
   useEffect(() => {
@@ -43,9 +55,19 @@ const Accounts = () => {
         <AccountsHeader setVisible={setVisible} onChange={onChange} />
       </Header>
       <Content className="account-list-content">
-        <AccountsMain list={filteredList} />
+        <Spin spinning={loading}>
+          <AccountsMain
+            list={filteredList}
+            openModal={(website, createModalType) =>
+              openModal(website, createModalType)
+            }
+          />
+        </Spin>
       </Content>
       <CreateSiteModal
+        type={createModalType}
+        siteValue={activeWebsite?.url}
+        siteId={activeWebsite?.objectId}
         visible={visible}
         onClose={() => setVisible(false)}
         onOk={() => getWebsiteList()}

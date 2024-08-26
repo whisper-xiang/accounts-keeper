@@ -8,7 +8,7 @@ export interface AccountItem {
 }
 
 export interface WebsiteItem {
-  objectId?: string;
+  objectId: string;
   url: string;
   accountCount: number;
   children?: AccountItem[];

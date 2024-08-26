@@ -64,7 +64,9 @@ const PasswordGenerator: React.FC = () => {
   return (
     <div className="password-generator-container">
       <Header className="header">
-        <h1>Password Generator</h1>
+        <h1>
+          <span className="ml-2">Password Generator</span>
+        </h1>
       </Header>
       <Form layout="vertical" className="form-container">
         <Form.Item label="Password Length">

@@ -71,7 +71,7 @@ const Settings = () => {
       <Header className="header">
         <h1>Settings</h1>
       </Header>
-      <Card bordered={false} actions={actions}>
+      <Card bordered={false} actions={actions} className="settings-card">
         <Form
           form={form}
           labelCol={{ span: 6 }}
