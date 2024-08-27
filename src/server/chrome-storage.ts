@@ -33,7 +33,15 @@ export async function fetchWebsiteById(websiteId: string) {
   });
 }
 
-export async function addWebsite(url: string, note: string) {
+export async function addWebsite({
+  url,
+  note,
+  icon,
+}: {
+  url: string;
+  note: string;
+  icon: string;
+}) {
   return new Promise((resolve) => {
     chrome.storage.local.get([Website_KEY], (result) => {
       const websites = result[Website_KEY] || [];
@@ -41,7 +49,7 @@ export async function addWebsite(url: string, note: string) {
         objectId: uuid2(),
         url,
         note,
-        icon: "",
+        icon,
         accounts: [],
       };
       websites.push(website);

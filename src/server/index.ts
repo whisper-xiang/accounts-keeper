@@ -29,6 +29,11 @@ async function initializeAPI() {
   }
 }
 
+export const getFaviconUrl = (url) => {
+  const domain = new URL(url).origin;
+  return `https://www.google.com/s2/favicons?domain=${domain}`;
+};
+
 await initializeAPI();
 
 export { initializeAPI, api };

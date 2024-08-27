@@ -32,7 +32,7 @@ type FieldType = {
   icon?: string;
 };
 
-const CreateAccount = ({
+const MasterCreateModal = ({
   visible,
   onOk,
   onClose,
@@ -354,4 +354,4 @@ const CreateAccount = ({
   );
 };
 
-export default CreateAccount;
+export default MasterCreateModal;

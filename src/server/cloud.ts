@@ -83,10 +83,19 @@ export async function fetchWebsiteById(websiteId: string) {
   }
 }
 
-export async function addWebsite(url: string, note: string) {
+export async function addWebsite({
+  url,
+  note,
+  icon,
+}: {
+  url: string;
+  note: string;
+  icon: string;
+}) {
   const website = new AV.Object("Websites");
   website.set("url", url);
   website.set("note", note);
+  website.set("icon", icon);
   await website.save();
   return website.id;
 }
