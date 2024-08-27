@@ -20,7 +20,7 @@ import {
 import TextArea from "antd/es/input/TextArea";
 import { generateRandomPassword } from "~utils";
 import "./index.less";
-import { CreateModalType } from "../../interface";
+import { CreateModalType, WebsiteItem } from "../../interface";
 
 import { api } from "@/server";
 
@@ -36,32 +36,31 @@ const CreateAccount = ({
   onOk,
   onClose,
   type = CreateModalType.CreateWebsite,
-  siteValue,
-  siteId,
+  activeSite,
 }: {
   visible: boolean;
-  onOk: (values: FieldType) => void;
+  onOk: () => void;
   onClose: () => void;
   type?: CreateModalType;
-  siteValue?: string;
-  siteId?: string;
+  activeSite?: WebsiteItem;
 }) => {
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false); // Loading state for the entire Modal
+  const [site, setSite] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const addWebsite = (site: string, note: string) => {
     return api.addWebsite(site, note);
   };
 
-  const addAccount = (
+  const addAccount = async (
     websiteId: string,
     username: string,
     password: string,
     note?: string
   ) => {
-    api
+    await api
       .addAccount(websiteId, username, password, note)
       .then(() => {
         messageApi.open({
@@ -78,7 +77,7 @@ const CreateAccount = ({
   };
 
   const onOkHandler = () => {
-    setLoading(true); // Start loading
+    setLoading(true);
     form
       .validateFields()
       .then(async (values) => {
@@ -88,7 +87,7 @@ const CreateAccount = ({
           const websiteId = await addWebsite(site, note);
 
           if (username && password) {
-            addAccount(websiteId, username, password);
+            await addAccount(websiteId, username, password);
           } else {
             messageApi.open({
               type: "success",
@@ -96,22 +95,20 @@ const CreateAccount = ({
             });
           }
         } else if (type === CreateModalType.CreateAccount) {
-          if (siteId) {
-            addAccount(siteId, username, password, note);
+          if (activeSite?.objectId) {
+            await addAccount(activeSite?.objectId, username, password, note);
           }
         } else if (type === CreateModalType.UpdateWebsite) {
-          if (siteId) {
-            await api.updateWebsite(siteId, site, note);
+          if (activeSite?.objectId) {
+            await api.updateWebsite(activeSite?.objectId, site, note);
             messageApi.open({
               type: "success",
               content: "Website updated successfully!",
             });
           }
         }
-        onOk(values);
-        form.resetFields();
-        setPassword("");
-        onClose();
+        onOk();
+        handleResetAndClose();
       })
       .finally(() => {
         setLoading(false);
@@ -137,7 +134,7 @@ const CreateAccount = ({
   const handlePasswordGeneration = () => {
     const newPassword = generateRandomPassword();
     if (newPassword) {
-      setPassword(newPassword); // Update the password state
+      setPassword(newPassword);
       form.setFieldsValue({ password: newPassword });
     } else {
       messageApi.open({
@@ -146,15 +143,22 @@ const CreateAccount = ({
       });
     }
   };
+  const handleResetAndClose = () => {
+    setPassword("");
+    setSite("");
+    form.resetFields();
+    onClose();
+  };
 
   useEffect(() => {
     if (!visible) {
       return;
     }
-    if (siteValue) {
-      form.setFieldsValue({ site: siteValue });
+    if (activeSite?.url) {
+      form.setFieldsValue({ site: activeSite.url, note: activeSite.note });
+      setSite(activeSite.url);
     }
-  }, [visible, siteValue, form]);
+  }, [visible, activeSite, form]);
 
   return (
     <Modal
@@ -163,14 +167,14 @@ const CreateAccount = ({
         type === CreateModalType.CreateWebsite
           ? "Create a new website"
           : type === CreateModalType.CreateAccount
-          ? `Create a new account for ${siteValue}`
-          : `Update website: ${siteValue}`
+          ? `Create a new account for ${activeSite?.url}`
+          : `Update website: ${activeSite?.url}`
       }
       open={visible}
       onOk={onOkHandler}
-      onCancel={onClose}
+      onCancel={handleResetAndClose}
       footer={[
-        <Button key="cancel" onClick={onClose} disabled={loading}>
+        <Button key="cancel" onClick={handleResetAndClose} disabled={loading}>
           Cancel
         </Button>,
         <Button
@@ -209,7 +213,8 @@ const CreateAccount = ({
           >
             <Space.Compact style={{ width: "100%" }}>
               <Input
-                defaultValue={siteValue}
+                value={site}
+                onChange={(e) => setSite(e.target.value)}
                 disabled={type === CreateModalType.CreateAccount}
                 placeholder="input website!"
                 prefix={<GlobalOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
@@ -239,11 +244,7 @@ const CreateAccount = ({
                           message: "Please input your username!",
                         },
                       ]
-                    : [
-                        {
-                          required: false,
-                        },
-                      ]
+                    : []
                 }
               >
                 <Space.Compact style={{ width: "100%" }}>
@@ -277,11 +278,7 @@ const CreateAccount = ({
                           message: "Please input your password!",
                         },
                       ]
-                    : [
-                        {
-                          required: false,
-                        },
-                      ]
+                    : []
                 }
               >
                 <Space.Compact style={{ width: "100%" }}>
@@ -290,11 +287,15 @@ const CreateAccount = ({
                     prefix={
                       <LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />
                     }
-                    value={password} // Bind the password state to the input value
-                    onChange={(e) => setPassword(e.target.value)} // Ensure changes to the input update the state
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                   />
                   <Tooltip title="password generator">
-                    <Button type="default" onClick={handlePasswordGeneration}>
+                    <Button
+                      type="default"
+                      onClick={handlePasswordGeneration}
+                      tabIndex={-1}
+                    >
                       <JavaScriptOutlined />
                     </Button>
                   </Tooltip>
@@ -315,6 +316,7 @@ const CreateAccount = ({
               <Divider dashed />
             </>
           )}
+
           <Form.Item<FieldType>
             label={
               [

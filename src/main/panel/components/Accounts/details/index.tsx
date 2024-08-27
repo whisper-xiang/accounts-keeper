@@ -31,11 +31,11 @@ import CreateSiteModal from "../components/Create";
 import { useNavigate, useParams } from "react-router-dom";
 import { api } from "@/server";
 import { generateRandomPassword } from "~utils";
-import { AccountItem, CreateModalType } from "../interface";
+import { AccountItem, CreateModalType, WebsiteItem } from "../interface";
 
 const Details: React.FC = () => {
   const [modal, contextHolder] = Modal.useModal();
-  const [site, setSite] = useState<string>("");
+  const [activeWebsite, setActiveWebsite] = useState<WebsiteItem>();
   const [loading, setLoading] = useState<boolean>(false); // Loading state for the entire page
   const [visible, setVisible] = useState<boolean>(false);
   const [list, setList] = useState<FormAccountType[]>([]);
@@ -54,16 +54,16 @@ const Details: React.FC = () => {
   }
 
   const getAccountList = async () => {
-    setLoading(true); // Start loading
+    setLoading(true);
     try {
       const websiteDetail = await api.fetchWebsiteById(websiteId);
-      const initialList = websiteDetail.children.map(
+      const initialList = websiteDetail.accounts.map(
         (item: FormAccountType) => ({
           ...item,
           originalPassword: item.password, // 保存初始密码
         })
       );
-      setSite(websiteDetail.url);
+      setActiveWebsite(websiteDetail);
       setList(initialList);
     } catch (error) {
       console.error("Failed to fetch account list:", error);
@@ -81,9 +81,10 @@ const Details: React.FC = () => {
     try {
       const updatedList = [...list];
       updatedList[index].isEdit = false;
+      updatedList[index].passwordVisible = false;
       setList(updatedList);
 
-      api.updateAccount(accountId, values).then(() => {
+      api.updateAccount(websiteId, accountId, values).then(() => {
         messageApi.open({
           type: "success",
           content: "Account updated successfully!",
@@ -107,11 +108,12 @@ const Details: React.FC = () => {
   const handleEdit = (index: number, item) => {
     const updatedList = [...list];
     updatedList[index].isEdit = true;
+    updatedList[index].passwordVisible = true;
     formRefs.current[index]?.setFieldsValue(item);
     setList(updatedList);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (accountId: string) => {
     modal.confirm({
       style: {
         top: "30%",
@@ -125,13 +127,15 @@ const Details: React.FC = () => {
       onOk() {
         setLoading(true); // Start loading for delete operation
         api
-          .deleteAccount(id)
+          .deleteAccount(websiteId, accountId)
           .then(() => {
             messageApi.open({
               type: "success",
               content: "Account deleted successfully!",
             });
-            const updatedList = list.filter((item) => item.objectId !== id);
+            const updatedList = list.filter(
+              (item) => item.objectId !== accountId
+            );
             setList(updatedList);
             console.log("Account deleted");
           })
@@ -208,7 +212,7 @@ const Details: React.FC = () => {
         <header>
           <h1 onClick={() => navigate(-1)} className="cursor-pointer">
             <LeftOutlined />
-            <span className="ml-2">{site}</span>
+            <span className="ml-2">{activeWebsite?.url}</span>
           </h1>
           <Button
             type="default"
@@ -390,8 +394,7 @@ const Details: React.FC = () => {
         <CreateSiteModal
           visible={visible}
           type={createModalType}
-          siteValue={site}
-          siteId={websiteId}
+          activeSite={activeWebsite}
           onClose={() => setVisible(false)}
           onOk={getAccountList}
         />

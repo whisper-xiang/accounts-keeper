@@ -1,13 +1,13 @@
 export enum StorageMode {
   Cloud = "cloud",
-  ChromeStorage = "chromeStorage",
-  ChromeSync = "chromeSync",
+  ChromeStorageLocal = "chromeStorageLocal",
+  ChromeStorageSync = "chromeStorageSync",
 }
 
 export interface SettingsConfigs {
-  masterPassword: string;
+  masterPassword?: string;
   storageMode: StorageMode;
-  APP_ID?: string;
-  APP_KEY?: string;
-  SERVER_URL?: string;
+  appId?: string;
+  appKey?: string;
+  serverURL?: string;
 }

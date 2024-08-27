@@ -4,7 +4,7 @@ import { CreateModalType, WebsiteItem } from "./interface";
 import CreateSiteModal from "./components/Create";
 import AccountsHeader from "./components/AccountsHeader/index.tsx";
 import AccountsMain from "./components/AccountsMain/index.tsx";
-import { fetchAndAssembleData } from "@/server/cloud";
+import { api } from "@/server";
 import "./index.less";
 
 const Accounts = () => {
@@ -30,7 +30,7 @@ const Accounts = () => {
   const getWebsiteList = async () => {
     setLoading(true);
     try {
-      const res = await fetchAndAssembleData();
+      const res = await api.fetchAndAssembleData();
       setList(res);
       setFilteredList(res);
       setLoading(false);
@@ -39,10 +39,13 @@ const Accounts = () => {
     }
   };
 
-  const openModal = (website: WebsiteItem, type: CreateModalType) => {
+  const openModal = (type: CreateModalType, website?: WebsiteItem) => {
     setVisible(true);
     setCreateModalType(type);
-    setActiveWebsite(website);
+
+    if (website) {
+      setActiveWebsite(website);
+    }
   };
 
   useEffect(() => {
@@ -51,27 +54,34 @@ const Accounts = () => {
 
   return (
     <Layout className="account-list-wrapper">
-      <Header className="account-list-header">
-        <AccountsHeader setVisible={setVisible} onChange={onChange} />
+      <Header className="account-list-header header">
+        <AccountsHeader
+          setVisible={() => {
+            setActiveWebsite(undefined);
+            openModal(CreateModalType.CreateWebsite);
+          }}
+          onChange={onChange}
+        />
       </Header>
       <Content className="account-list-content">
         <Spin spinning={loading}>
           <AccountsMain
             list={filteredList}
-            openModal={(website, createModalType) =>
-              openModal(website, createModalType)
+            openModal={(createModalType, website) =>
+              openModal(createModalType, website)
             }
           />
         </Spin>
       </Content>
-      <CreateSiteModal
-        type={createModalType}
-        siteValue={activeWebsite?.url}
-        siteId={activeWebsite?.objectId}
-        visible={visible}
-        onClose={() => setVisible(false)}
-        onOk={() => getWebsiteList()}
-      />
+      {visible && (
+        <CreateSiteModal
+          type={createModalType}
+          activeSite={activeWebsite}
+          visible={visible}
+          onClose={() => setVisible(false)}
+          onOk={() => getWebsiteList()}
+        />
+      )}
     </Layout>
   );
 };

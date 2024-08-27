@@ -10,8 +10,7 @@ export interface AccountItem {
 export interface WebsiteItem {
   objectId: string;
   url: string;
-  accountCount: number;
-  children?: AccountItem[];
+  accounts: AccountItem[];
   icon?: string;
   note?: string;
 }

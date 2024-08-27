@@ -1,12 +1,34 @@
-async function API(type: "cloud" | "local"): Promise<any> {
-  if (type === "cloud") {
-    return await import("./cloud");
-  } else {
-    return await import("./cloud");
+import { StorageMode } from "../main/panel/components/Settings/types";
+import { getSettingsConfigs, setSettingsConfigs } from "./configCache";
+
+let api: any = null;
+
+async function loadAPI(storageMode: StorageMode) {
+  switch (storageMode) {
+    case StorageMode.Cloud:
+      return import("./cloud");
+    case StorageMode.ChromeStorageSync:
+      return import("./chrome-sync");
+    default:
+      return import("./chrome-storage");
   }
 }
 
-// TODO type由本地settings决定
-const api = await API("cloud");
+async function initializeAPI() {
+  try {
+    const { storageMode } =
+      (await getSettingsConfigs()) ||
+      (await setSettingsConfigs({
+        storageMode: StorageMode.ChromeStorageLocal,
+      }));
+    api = await loadAPI(storageMode);
+    return api;
+  } catch (error) {
+    console.error("Failed to load API:", error);
+    throw error;
+  }
+}
 
-export { api };
+await initializeAPI();
+
+export { initializeAPI, api };

@@ -24,6 +24,7 @@
   "include": ["src"],
   "paths": {
     "@/*": ["src/*"],
+    "@/server": ["src/server/index"],
     "~utils/*": ["src/main/utils/*"],
     // 其他别名的路径映射
   }

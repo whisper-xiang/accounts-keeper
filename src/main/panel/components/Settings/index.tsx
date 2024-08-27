@@ -7,6 +7,7 @@ import {
   updateSettingConfigs,
 } from "../../../../server/configCache";
 import { SettingsConfigs, StorageMode } from "./types";
+import { initializeAPI } from "@/server";
 
 const Settings = () => {
   const [storageMode, setStorageMode] = useState(StorageMode.Cloud);
@@ -17,9 +18,9 @@ const Settings = () => {
 
   const [initialValues, setInitialValues] = useState<SettingsConfigs>({
     storageMode: StorageMode.Cloud,
-    APP_ID: "",
-    APP_KEY: "",
-    SERVER_URL: "",
+    appId: "",
+    appKey: "",
+    serverURL: "https://avoscloud.com",
     masterPassword: "",
   });
 
@@ -43,6 +44,7 @@ const Settings = () => {
     form.validateFields().then(async (values) => {
       // 发送保存请求到接口
       await updateSettingConfigs(values);
+      await initializeAPI();
       messageApi.success("Settings saved successfully!");
       setInitialValues(values);
       setIsEdit(false);
@@ -99,18 +101,20 @@ const Settings = () => {
           <Form.Item label="Storage mode" name="storageMode">
             <Radio.Group disabled={!isEdit}>
               <Radio.Button value={StorageMode.Cloud}>cloud</Radio.Button>
-              <Radio.Button value={StorageMode.ChromeStorage}>
+              <Radio.Button value={StorageMode.ChromeStorageLocal}>
                 storage
               </Radio.Button>
-              <Radio.Button value={StorageMode.ChromeSync}>sync</Radio.Button>
+              <Radio.Button value={StorageMode.ChromeStorageSync}>
+                sync
+              </Radio.Button>
             </Radio.Group>
           </Form.Item>
           <small className="mb-2 d-block">
             {storageMode === StorageMode.Cloud
               ? "All passwords will be encrypted and stored in the cloud."
-              : storageMode === StorageMode.ChromeStorage
+              : storageMode === StorageMode.ChromeStorageLocal
               ? "All passwords will be encrypted and stored in the local storage."
-              : storageMode === StorageMode.ChromeSync
+              : storageMode === StorageMode.ChromeStorageSync
               ? "All passwords will be encrypted and stored in the sync storage."
               : ""}
           </small>
@@ -130,7 +134,13 @@ const Settings = () => {
               >
                 <Input disabled={!isEdit} />
               </Form.Item>
-              <Form.Item label="SERVER_URL" name="serverUrl">
+              <Form.Item
+                label="SERVER_URL"
+                name="serverURL"
+                rules={[
+                  { required: true, message: "Please input SERVER_URL!" },
+                ]}
+              >
                 <Input disabled={!isEdit} />
               </Form.Item>
             </>

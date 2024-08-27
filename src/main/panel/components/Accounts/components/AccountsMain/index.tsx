@@ -4,8 +4,9 @@ import {
   EditOutlined,
   EllipsisOutlined,
   ExclamationCircleFilled,
+  PlusOutlined,
 } from "@ant-design/icons";
-import { Avatar, Button, List, message, Modal, Popover } from "antd";
+import { Avatar, Button, Empty, List, message, Modal, Popover } from "antd";
 import "./index.less";
 import { useNavigate } from "react-router-dom";
 import { CreateModalType, WebsiteItem } from "../../interface";
@@ -17,9 +18,8 @@ const AccountsMain = ({
   openModal = () => {},
 }: {
   list: WebsiteItem[] | undefined;
-  openModal: (website: WebsiteItem, type: CreateModalType) => void;
+  openModal: (type: CreateModalType, website?: WebsiteItem) => void;
 }) => {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [modal, contextHolder] = Modal.useModal();
   const [messageApi, messageContextHolder] = message.useMessage();
@@ -27,7 +27,7 @@ const AccountsMain = ({
 
   const editWebsite = (website: WebsiteItem) => {
     if (!website.objectId) return;
-    openModal(website, CreateModalType.UpdateWebsite);
+    openModal(CreateModalType.UpdateWebsite, website);
   };
 
   const removeWebsite = (websiteId: string, index: number) => {
@@ -95,26 +95,40 @@ const AccountsMain = ({
 
   return (
     <>
-      <List
-        className="accounts-main-list"
-        loading={loading}
-        itemLayout="horizontal"
-        dataSource={list}
-        bordered
-        renderItem={(item, index) => (
-          <List.Item
-            key={item.objectId}
-            className="cursor-pointer"
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(null)}
-            onClick={() => navigate(`/details/${item.objectId}`)}
-            actions={[<CaretRightOutlined />]}
-            extra={
-              <div className="w-10 h-10 flex items-center justify-center">
-                {hoveredIndex === index && (
-                  <Popover content={headerBtns(item, index)} trigger="click">
+      {list.length === 0 ? (
+        <div className="empty-container">
+          <Empty description='no website found, click "+" button to create'>
+            <Button
+              type="default"
+              className="ml-2 header-button"
+              onClick={() => {
+                openModal(CreateModalType.CreateWebsite);
+              }}
+              icon={<PlusOutlined />}
+            >
+              {" "}
+              create website
+            </Button>
+          </Empty>
+        </div>
+      ) : (
+        <List
+          className="accounts-main-list"
+          loading={loading}
+          itemLayout="horizontal"
+          dataSource={list}
+          bordered
+          renderItem={(item, index) => (
+            <List.Item
+              key={item.objectId}
+              className="cursor-pointer"
+              onClick={() => navigate(`/details/${item.objectId}`)}
+              actions={[<CaretRightOutlined />]}
+              extra={
+                <div className="w-10 h-10">
+                  <Popover content={headerBtns(item, index)} trigger="hover">
                     <div
-                      className="flex items-center justify-center"
+                      className="w-full h-full flex items-center justify-center"
                       onClick={(e) => {
                         e.stopPropagation();
                       }}
@@ -122,44 +136,48 @@ const AccountsMain = ({
                       <EllipsisOutlined className="transform rotate-90" />
                     </div>
                   </Popover>
-                )}
-              </div>
-            }
-          >
-            <List.Item.Meta
-              avatar={
-                <Avatar
-                  src={
-                    item.icon ||
-                    "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png"
-                  }
-                />
-              }
-              title={
-                <div className="flex items-center justify-between">
-                  <span
-                    style={{
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      window.open(item.url);
-                    }}
-                  >
-                    {item.url}
-                  </span>
-                  <div className="ml-2 text-xs text-gray-500">
-                    {item.accountCount} accounts
-                  </div>
                 </div>
               }
-              description={item.note}
-            />
-          </List.Item>
-        )}
-      />
+            >
+              <List.Item.Meta
+                avatar={
+                  <Avatar
+                    src={
+                      item.icon ||
+                      "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png"
+                    }
+                  />
+                }
+                title={
+                  <div className="flex items-center justify-between">
+                    <span
+                      style={{
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        window.open(item.url);
+                      }}
+                    >
+                      {item.url}
+                      <span className="ml-2 text-xs text-gray-500">
+                        ( {item?.accounts?.length} accounts )
+                      </span>
+                    </span>
+                    {/* <div className="ml-2 text-xs text-gray-500">
+                      {item?.accounts?.length} accounts
+                    </div> */}
+                  </div>
+                }
+                description={item.note}
+              />
+            </List.Item>
+          )}
+        />
+      )}
+
       {contextHolder}
       {messageContextHolder}
     </>

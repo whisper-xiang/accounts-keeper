@@ -1,4 +1,4 @@
-// settings缓存放入 chrome sync中
+// settings、generator缓存放入 chrome sync中
 const SETTINGS_NAME = "settings";
 const GENERATOR_NAME = "generator";
 
@@ -15,10 +15,10 @@ export const getSettingsConfigs: () => Promise<SettingsConfigs> = async () => {
 
 export const setSettingsConfigs: (
   configs: SettingsConfigs
-) => Promise<void> = async (configs) => {
+) => Promise<SettingsConfigs> = async (configs) => {
   return new Promise((resolve) => {
     chrome.storage.sync.set({ [SETTINGS_NAME]: configs }, () => {
-      resolve();
+      resolve(configs);
     });
   });
 };
@@ -33,7 +33,7 @@ export const clearSettingsCache: () => Promise<void> = async () => {
 
 export const updateSettingConfigs: (
   configs: Partial<SettingsConfigs>
-) => Promise<void> = async (configs) => {
+) => Promise<SettingsConfigs> = async (configs) => {
   const currentConfigs = await getSettingsConfigs();
   const newConfigs = { ...currentConfigs, ...configs };
   return setSettingsConfigs(newConfigs);

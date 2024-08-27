@@ -1,72 +1,20 @@
-import AV from "./leanCloud-config";
+import AV from "leancloud-storage";
 
-// export default {
-//   // 获取所有账号
-//   getAllAccounts: async () => {
-//     const websitesQuery = new AV.Query("websites");
-//     const websites = await websitesQuery.find();
+import { getSettingsConfigs } from "./configCache";
+import { message } from "antd";
 
-//     const ids = websites.map((website) => website.id);
+const { appId, appKey, serverURL } = await getSettingsConfigs();
 
-//     const accountsQuery = new AV.Query("accounts");
-//     accountsQuery.containedIn("parentId", ids);
-//     const accounts = await accountsQuery.find();
-
-//     const result = websites.map((website) => {
-//       const account = accounts.filter(
-//         (account) => account.get("parentId") === website.id
-//       );
-//       return {
-//         ...website.toJSON(),
-//         children: account.map((acc) => acc.toJSON()),
-//       };
-//     });
-
-//     return result;
-//   },
-
-//   // 新增账号
-//   addAccount: async (data) => {
-//     const websiteId = data.websiteId;
-//     if (websiteId) {
-//       const accountObj = new AV.Object("accounts");
-
-//       accountObj.set("username", data.username);
-
-//       accountObj.set("password", data.password);
-
-//       accountObj.set("parentId", websiteId);
-
-//       await accountObj.save();
-
-//       return accountObj.toJSON();
-//     } else {
-//       const website = new AV.Object("websites");
-//       website.set("name", data.websiteName);
-//       website.set("url", data.websiteUrl);
-//       await website.save();
-
-//       const accountObj = new AV.Object("accounts");
-
-//       accountObj.set("username", data.username);
-
-//       accountObj.set("password", data.password);
-
-//       accountObj.set("parentId", website.id);
-
-//       await accountObj.save();
-
-//       return accountObj.toJSON();
-//     }
-//   },
-
-//   // 删除账号
-//   deleteAccount: async (id) => {
-//     const account = AV.Object.createWithoutData("accounts", id);
-//     await account.destroy();
-//     return id;
-//   },
-// };
+try {
+  AV.init({
+    appId: appId || "",
+    appKey: appKey || "",
+    serverURL,
+  });
+} catch (e: any) {
+  message.error("LeanCloud init error: " + e.message);
+  console.error("LeanCloud init error", e);
+}
 
 export async function ensureTableExists(tableName: string): Promise<void> {
   try {
@@ -111,8 +59,7 @@ export async function fetchAndAssembleData() {
 
     return {
       ...website.toJSON(),
-      accountCount: relatedAccounts.length,
-      children: relatedAccounts.map((account) => account.toJSON()),
+      accounts: relatedAccounts.map((account) => account.toJSON()),
     };
   });
 
@@ -129,7 +76,7 @@ export async function fetchWebsiteById(websiteId: string) {
     const accounts = await accountQuery.find();
     return {
       ...website.toJSON(),
-      children: accounts.map((account) => account.toJSON()),
+      accounts: accounts.map((account) => account.toJSON()),
     };
   } else {
     return null;
@@ -192,13 +139,14 @@ export async function addAccount(
   return account.id;
 }
 
-export async function deleteAccount(accountId: string) {
+export async function deleteAccount(websiteId: string, accountId: string) {
   const account = AV.Object.createWithoutData("Accounts", accountId);
   await account.destroy();
   return accountId;
 }
 
 export async function updateAccount(
+  websiteId: string,
   accountId: string,
   data: { username?: string; password?: string; note?: string }
 ) {

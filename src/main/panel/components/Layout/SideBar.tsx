@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useEffect } from "react";
 import { HomeOutlined, LockOutlined, SettingOutlined } from "@ant-design/icons";
 import { SideBarItem, SideBarProps } from "./interface";
+import { useLocation } from "react-router-dom";
 
 const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
   const [activeIndex, setActiveIndex] = React.useState<number>(0);
@@ -35,6 +36,8 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
     []
   );
 
+  const location = useLocation();
+
   const handleItemClick = useCallback(
     (item: SideBarItem, index: number) => {
       setActiveIndex(index);
@@ -44,8 +47,15 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
   );
 
   useEffect(() => {
-    // onItemClick(SideBarItems[2]);
-  }, []);
+    const currentPath = location.pathname;
+    const currentIndex = SideBarItems.findIndex(
+      (item) => item.path === currentPath
+    );
+
+    if (currentIndex !== -1) {
+      setActiveIndex(currentIndex);
+    }
+  }, [location.pathname, SideBarItems]);
 
   return (
     <div className="flex flex-col items-center h-full pt-4 pb-20 text-white">
