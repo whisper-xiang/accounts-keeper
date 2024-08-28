@@ -22,10 +22,9 @@
     "noImplicitAny": false
   },
   "include": ["src"],
+  "baseUrl": ".",
   "paths": {
     "@/*": ["src/*"],
-    "@/server": ["src/server/index"],
-    "~utils/*": ["src/main/utils/*"],
-    // 其他别名的路径映射
+    "~utils/*": ["src/main/utils/*"]
   }
 }

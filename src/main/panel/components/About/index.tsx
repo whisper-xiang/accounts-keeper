@@ -3,77 +3,103 @@ import { Collapse, Layout } from "antd";
 import type { CollapseProps } from "antd";
 import "./index.less";
 
-// Content text
-const text = `
-  A dog is a type of domesticated animal.
-  Known for its loyalty and faithfulness,
-  it can be found as a welcome guest in many households across the world.
-`;
-
 // Collapse items definition
 const items: CollapseProps["items"] = [
   {
     key: "1",
     label: "Master Password (主密码)",
     children: (
-      <p>
-        主密码经过 SHA256 加密存储在 <strong>本地缓存</strong>{" "}
-        中。所有账号密码经主密码 AES 加密后存储在{" "}
-        <strong>LeanCloud | Chrome Storage</strong> 中。
-        <br />
-        如因某些原因导致本地存储丢失，可重新设置。
-        <br />
-        请勿忘记主密码。
-      </p>
+      <div>
+        <p>
+          1. 主密码存储在
+          <strong> Chrome本地缓存 </strong>中。用于加密所有记录账号的密码
+        </p>
+        <p>2. 如因某些原因导致本地存储丢失，可重新设置。</p>
+        <p>
+          3.
+          请务必牢记主密码。如若丢失，所有记录的账号密码将永远成为一堆无法解密的加密乱码。
+        </p>
+      </div>
     ),
   },
   {
-    key: "8",
+    key: "2",
     label: "数据存在哪儿？",
     children: (
-      <p>
-        Accounts Keeper 支持三种存储方法：
-        <ul>
+      <div>
+        <strong>Accounts Keeper 支持三种存储方法：</strong>
+        <ul className="pl-4 mt-2">
           <li>
-            LeanCloud: Serverless 云服务，提供数据存储和查询，
-            <strong>免费提供 500MB</strong> 存储空间。您可自行免费注册，通过
-            app_key 等配置连接，并将数据（经加密后）存于其中。
+            1. LeanCloud: Serverless 云服务。
+            {/* ， */}
           </li>
-          <li>Chrome Storage (local 和 sync)：用于在本地浏览器存储数据。</li>
+          <li>2. Chrome Storage local：在本地浏览器存储数据。</li>
+          <li>
+            3. Chrome Storage
+            sync：用于在本地浏览器存储数据，但数据会同步到所有chrome账号。
+          </li>
         </ul>
-      </p>
-    ),
-  },
-  {
-    key: "0",
-    label: "LeanCloud 注册流程",
-    children: (
-      <ol>
-        <li>注册 LeanCloud 账号，并创建应用。</li>
-        <li>配置 API Key 和 API Secret。</li>
-        <li>登录 LeanCloud，创建表格，添加表格字段。</li>
-        <li>登录 Chrome，安装插件。</li>
-        <li>输入主密码，点击保存。</li>
-        <li>输入账号密码，点击保存。</li>
-      </ol>
+      </div>
     ),
   },
   {
     key: "3",
-    label: "如何获取 API Key 和 API Secret",
-    children: <p>{text}</p>,
-  },
-  {
-    key: "9",
-    label: "菜单说明",
-    children: <p>Accounts Keeper 的主要功能和选项说明。</p>,
+    label: "LeanCloud 使用说明",
+    children: (
+      <div className="pl-4 mt-2">
+        <ol>
+          <li>
+            LeanCloud 提供数据存储和查询，
+            <strong>免费提供 500MB</strong> 存储空间。
+          </li>
+          <li>
+            1. 注册{" "}
+            <a
+              href="https://www.leancloud.cn/"
+              target="_blank"
+              className="link text-blue-500"
+            >
+              LeanCloud
+            </a>{" "}
+            账号。登录后点击左上角"创建应用"按钮，填写 “任意名” 创建应用。
+            <img src="/public/cloud0.png" alt="" />
+            <img src="/public/cloud1.jpg" alt="" />
+          </li>
+          <li className="mt-2">
+            2. 进入设置-应用凭证，复制 AppId 和 AppKey 到 Accounts Keeper 的
+            Settings 页面。
+            <img src="/public/cloud2.jpg" alt="" />
+          </li>
+          <li className="mt-2">
+            3. Accounts Keeper 会自动连接 LeanCloud 并在首次添加网站时分别建立
+            Websites、Accounts 两张表，用于存储数据。
+            <img src="/public/cloud3.jpg" alt="" />
+          </li>
+          <li className="mt-2">
+            4. 所有数据经<strong>主密码加密</strong>后存于 LeanCloud 云端。
+          </li>
+        </ol>
+      </div>
+    ),
   },
   {
     key: "4",
+    label: "菜单说明",
+    children: (
+      <div className="pl-4 mt-2">
+        <p>1. Accounts: 账号管理。</p>
+        <p>2. Generator: 密码生成器。其设置会缓存到本地。</p>
+        <p>3. Settings: 设置 `主密码` 和 `存储位置`。</p>
+        <p>4. About: 关于页面。</p>
+      </div>
+    ),
+  },
+  {
+    key: "5",
     label: "Why English?",
     children: (
       <p>
-        <del>老子乐意~</del> 最近在学英语。
+        <del>老子乐意~</del> 嗯~最近在学英语。
       </p>
     ),
   },
