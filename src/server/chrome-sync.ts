@@ -1,4 +1,5 @@
 import { uuid2 } from "../main/utils/uuid";
+import { decryptPassword, encryptPassword } from "./utils";
 
 const Website_KEY = "websites";
 interface Website {
@@ -11,24 +12,49 @@ interface Website {
     username: string;
     password: string;
     note: string;
-  };
+  }[];
 }
-
 export async function fetchAndAssembleData(): Promise<Website[]> {
   return new Promise((resolve) => {
     chrome.storage.sync.get([Website_KEY], (result) => {
-      resolve(result[Website_KEY] || []);
+      const websites: Website[] = result[Website_KEY] || [];
+
+      const assembledData = websites.map((website) => {
+        const accounts = website.accounts.map((account) => {
+          return {
+            ...account,
+            password: decryptPassword(account.password),
+          };
+        });
+
+        return {
+          ...website,
+          accounts,
+        };
+      });
+
+      resolve(assembledData);
     });
   });
 }
 
-export async function fetchWebsiteById(websiteId: string) {
+export async function fetchWebsiteById(
+  websiteId: string
+): Promise<Website | undefined> {
   return new Promise((resolve) => {
     chrome.storage.sync.get([Website_KEY], (result) => {
-      const websites = result[Website_KEY] || [];
+      const websites: Website[] = result[Website_KEY] || [];
       const website = websites.find(
-        (website: Website) => website.objectId === websiteId
+        (website) => website.objectId === websiteId
       );
+
+      if (website) {
+        website.accounts = website.accounts.map((account) => ({
+          ...account,
+          password: decryptPassword(account.password), // 解密密码
+        }));
+      }
+
       resolve(website);
     });
   });
@@ -55,7 +81,7 @@ export async function addWebsite({
       };
       websites.push(website);
       chrome.storage.sync.set({ [Website_KEY]: websites }, () => {
-        resolve(website);
+        resolve(website.objectId);
       });
     });
   });
@@ -98,7 +124,7 @@ export async function updateWebsite(
           website.note = note;
         }
         chrome.storage.sync.set({ [Website_KEY]: websites }, () => {
-          resolve(website);
+          resolve(website.objectId);
         });
       } else {
         resolve(null);
@@ -119,17 +145,18 @@ export async function addAccount(
       const index = websites.findIndex(
         (website: Website) => website.objectId === websiteId
       );
+
       if (index !== -1) {
         const website = websites[index];
         const account = {
           objectId: uuid2(),
           username,
-          password,
+          password: encryptPassword(password),
           note: note || "",
         };
-        website.accounts.push(account);
+        website.accounts.unshift(account);
         chrome.storage.sync.set({ [Website_KEY]: websites }, () => {
-          resolve(account);
+          resolve(account.objectId);
         });
       } else {
         resolve(null);
@@ -187,7 +214,7 @@ export async function updateAccount(
             account.username = data.username;
           }
           if (data.password) {
-            account.password = data.password;
+            account.password = encryptPassword(data.password);
           }
           if (data.note) {
             account.note = data.note;

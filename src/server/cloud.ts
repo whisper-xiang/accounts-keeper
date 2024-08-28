@@ -2,6 +2,7 @@ import AV from "leancloud-storage";
 
 import { getSettingsConfigs } from "./configCache";
 import { message } from "antd";
+import { decryptPassword, encryptPassword } from "./utils";
 
 const { appId, appKey, serverURL } = await getSettingsConfigs();
 
@@ -59,7 +60,13 @@ export async function fetchAndAssembleData() {
 
     return {
       ...website.toJSON(),
-      accounts: relatedAccounts.map((account) => account.toJSON()),
+      accounts: relatedAccounts.map((account) => {
+        const item = account.toJSON();
+        return {
+          ...item,
+          password: decryptPassword(item.password),
+        };
+      }),
     };
   });
 
@@ -76,7 +83,13 @@ export async function fetchWebsiteById(websiteId: string) {
     const accounts = await accountQuery.find();
     return {
       ...website.toJSON(),
-      accounts: accounts.map((account) => account.toJSON()),
+      accounts: accounts.map((account) => {
+        const item = account.toJSON();
+        return {
+          ...item,
+          password: decryptPassword(item.password),
+        };
+      }),
     };
   } else {
     return null;
@@ -137,11 +150,9 @@ export async function addAccount(
   if (!websiteId) {
     throw new Error("Website ID is required.");
   }
-  console.log("addAccount", websiteId, username, password, note);
-
   const account = new AV.Object("Accounts");
   account.set("username", username);
-  account.set("password", password);
+  account.set("password", encryptPassword(password));
   account.set("belong", websiteId);
   account.set("note", note);
   await account.save();
@@ -163,9 +174,9 @@ export async function updateAccount(
     throw new Error("Account ID is required.");
   }
   const account = AV.Object.createWithoutData("Accounts", accountId);
-  account.set("username", data.username);
-  account.set("password", data.password);
-  account.set("note", data.note);
+  data?.username && account.set("username", data.username);
+  data?.password && account.set("password", encryptPassword(data.password));
+  data?.note && account.set("note", data.note);
   await account.save();
   return account.id;
 }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Layout, Modal, Spin } from "antd";
+import { Divider, Form, Input, Layout, Modal, Spin } from "antd";
 import { CreateModalType, WebsiteItem } from "./interface";
 import CreateSiteModal from "./components/Create";
 import AccountsHeader from "./components/AccountsHeader/index.tsx";
@@ -9,6 +9,7 @@ import "./index.less";
 import MasterCreateModal from "./components/MasterCreateModal";
 import { getSettingsConfigs } from "../../../../server/configCache.ts";
 import { useNavigate } from "react-router-dom";
+import { LockOutlined } from "@ant-design/icons";
 const Accounts = () => {
   const { Content, Header } = Layout;
 
@@ -35,6 +36,8 @@ const Accounts = () => {
     setLoading(true);
     try {
       const res = await api.fetchAndAssembleData();
+      console.log("res", res);
+
       setList(res);
       setFilteredList(res);
       setLoading(false);
@@ -45,6 +48,7 @@ const Accounts = () => {
 
   const openModal = async (type: CreateModalType, website?: WebsiteItem) => {
     const { masterPassword } = await getSettingsConfigs();
+
     if (!masterPassword) {
       setMasterCreateVisible(true);
       return;
@@ -56,6 +60,8 @@ const Accounts = () => {
       setActiveWebsite(website);
     }
   };
+
+  const onFinish = (value: string) => {};
 
   useEffect(() => {
     getWebsiteList();
@@ -92,17 +98,44 @@ const Accounts = () => {
       <Modal
         open={masterCreateVisible}
         onOk={() => navigate("/settings")}
-        title="未设置主密码"
+        onClose={() => setMasterCreateVisible(false)}
+        onCancel={() => setMasterCreateVisible(false)}
+        title="提示"
       >
-        ！！需要先设置主密码，才能存储账号。
-        <br />
+        <p>需要先设置主密码，才能存储账号。</p>
+        <Form
+          name="createMaster"
+          labelCol={{ span: 4 }}
+          wrapperCol={{ span: 18 }}
+          layout="vertical"
+          onFinish={(values) => onFinish(values)}
+        >
+          <Form.Item
+            label="MasterPassword"
+            name="masterPassword"
+            rules={[
+              {
+                required: true,
+                message: "Please input your masterPassword!",
+              },
+            ]}
+          >
+            <Input
+              placeholder="input masterPassword"
+              prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
+            ></Input>
+          </Form.Item>
+        </Form>
+
+        <Divider />
         <strong>
-          1. 请在设置页面设置主密码， 所有密码会基于主密码进行加密存储。
+          1. 请先创建主密码。所有账号密码会基于主密码进行加密存储。
         </strong>
         <br />
         <strong>
-          2.
-          请务必牢记主密码，切勿泄露。主密码只存储在本地，一旦丢失，所有密码将无法恢复
+          2. 请务必牢记主密码，切勿泄露。
+          <br />
+          3. 主密码只存储在本地，一旦遗忘，所记录的所有账号密码将无法解密。
         </strong>
       </Modal>
       {/* <MasterCreateModal visible={masterCreateVisible} /> */}
