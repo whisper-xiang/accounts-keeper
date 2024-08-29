@@ -15,6 +15,7 @@ All notable changes to this project will be documented in this file. See [standa
 * create modal ([a4c4fe1](https://github.com/whisper-xiang/accounts-keeper/commit/a4c4fe1885f6d26fa96f3abb5b8aac587b688913))
 * details接口接入完成 ([5ada12e](https://github.com/whisper-xiang/accounts-keeper/commit/5ada12e3189dbcf975c88975220ef0b5f9a4e011))
 * hash路由接入 ([9f24f46](https://github.com/whisper-xiang/accounts-keeper/commit/9f24f4675e9c9485659e33ddbfb3f3844eeab429))
+* install standard-version ([c19eeac](https://github.com/whisper-xiang/accounts-keeper/commit/c19eeac70a9ad68f3554ce28ec4e6e31a2d3f30d))
 * leancloud api 调整 ([3c37ac7](https://github.com/whisper-xiang/accounts-keeper/commit/3c37ac7166640c8682869f1784abf4eb630c3030))
 * leancloud初始化 ([d0b1dfe](https://github.com/whisper-xiang/accounts-keeper/commit/d0b1dfeb224fd4293e0eff413203a373951b012a))
 * npm init ([233ded7](https://github.com/whisper-xiang/accounts-keeper/commit/233ded7f3a60802971cd258f611857d336ef04c9))
