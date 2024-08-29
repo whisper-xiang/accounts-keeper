@@ -10,17 +10,18 @@
 - 账号记录增删改查。
 - 密码加密存储。 基于用户设置的“主密码”保护账号密码，<strong>主密码不存储在服务器上</strong>，仅在本地浏览器中存储。
 - 数据可选择性存储在：
-  - 默认：chrome storage local中。
-  - 可选：chrome storage sync 中，数据将同步到其他设备chrome浏览器。
-  - 可选：leanCloud中。免费存储空间，数据安全性高。 【推荐，密码加密存储，安全性也高】
+  - 默认：`chrome storage local`中。
+  - 可选：`chrome storage sync` 中，数据将同步到其他设备chrome浏览器。
+  - 可选：[leanCloud](https://www.leancloud.cn/) 中。免费存储空间，数据安全性高。 【推荐，密码加密存储，安全性也高】
 - 账号记录查询，支持模糊查询。
 - 密码生成器，支持随机密码生成。
 
 ## 部分截图
-  ![alt text](public/create.png)
-  ![alt text](public/index.png)
-  ![alt text](public/generate.png)
-
+<div class="flex justify-between items-center gap-4">
+  <img src="public/create.png" alt="Create Screenshot" class="w-1/5 rounded-lg">
+  <img src="public/index.png" alt="Index Screenshot" class="w-1/5 rounded-lg">
+  <img src="public/generate.png" alt="Generate Screenshot" class="w-1/5 rounded-lg">
+</div>
 
 ## 安装使用
 
@@ -41,10 +42,10 @@
 
 
 
-  
+
 ## TODO
 
-### 功能
+### 1. 功能
 - 页面右键菜单，
   - 添加账号至插件中保存
   - 一键生成随机密码。
@@ -52,5 +53,5 @@
 - 账号记录导出，支持导出为csv文件。
 - 账号记录导入，支持导入csv文件。
   
-### 客户端
+### 2. 客户端
   - 小程序
