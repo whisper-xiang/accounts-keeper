@@ -1,10 +1,7 @@
 import React, { useCallback, useMemo, useEffect } from "react";
-import { HomeOutlined, SettingOutlined } from "@ant-design/icons";
+import { HomeOutlined, LockOutlined, SettingOutlined } from "@ant-design/icons";
 import { SideBarItem, SideBarProps } from "./interface";
-
-const Accounts = React.lazy(() => import("../Accounts/index"));
-const Settings = React.lazy(() => import("../Settings/index"));
-const About = React.lazy(() => import("../About/index"));
+import { useLocation } from "react-router-dom";
 
 const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
   const [activeIndex, setActiveIndex] = React.useState<number>(0);
@@ -13,31 +10,33 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
     () => [
       {
         key: "accounts",
-        label: "账号",
+        label: "Accounts",
         icon: <HomeOutlined />,
-        component: Accounts,
+        path: "/",
       },
-      // {
-      //   key: "password-create",
-      //   label: "密码生成器",
-      //   icon: <LockOutlined />,
-      //   component: Accounts,
-      // },
+      {
+        key: "pwd-generator",
+        label: "Generator",
+        icon: <LockOutlined />,
+        path: "/pwd-generator",
+      },
       {
         key: "settings",
-        label: "设置",
+        label: "Settings",
         icon: <SettingOutlined />,
-        component: Settings,
+        path: "/settings",
       },
       {
         key: "about",
-        label: "关于",
+        label: "About",
         icon: <SettingOutlined />,
-        component: About,
+        path: "/about",
       },
     ],
     []
   );
+
+  const location = useLocation();
 
   const handleItemClick = useCallback(
     (item: SideBarItem, index: number) => {
@@ -48,8 +47,15 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
   );
 
   useEffect(() => {
-    onItemClick(SideBarItems[1]);
-  }, []);
+    const currentPath = location.pathname;
+    const currentIndex = SideBarItems.findIndex(
+      (item) => item.path === currentPath
+    );
+
+    if (currentIndex !== -1) {
+      setActiveIndex(currentIndex);
+    }
+  }, [location.pathname, SideBarItems]);
 
   return (
     <div className="flex flex-col items-center h-full pt-4 pb-20 text-white">
@@ -57,7 +63,7 @@ const SideBar: React.FC<SideBarProps> = ({ onItemClick }) => {
         <div
           key={item.key}
           className={`flex flex-col items-center py-2 cursor-pointer ${
-            activeIndex === index ? "bg-color-primary-bg" : ""
+            activeIndex === index ? "active-sidebar-item" : "sidebar-item"
           }`}
           onClick={() => handleItemClick(item, index)}
         >

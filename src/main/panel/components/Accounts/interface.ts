@@ -1,13 +1,22 @@
 export interface AccountItem {
-  objectId?: string;
-  account: string;
+  objectId: string;
+  username: string;
   password: string;
   remark?: string;
   isEditing?: boolean;
+  note?: string;
 }
 
 export interface WebsiteItem {
-  objectId?: string;
-  name: string;
-  children: AccountItem[];
+  objectId: string;
+  url: string;
+  accounts: AccountItem[];
+  icon?: string;
+  note?: string;
+}
+
+export enum CreateModalType {
+  CreateWebsite = "createWebsite",
+  UpdateWebsite = "updateWebsite",
+  CreateAccount = "createAccount",
 }

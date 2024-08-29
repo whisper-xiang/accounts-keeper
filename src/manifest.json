@@ -5,7 +5,13 @@
   "version": "1.0.0",
   "permissions": ["sidePanel", "storage"],
   "side_panel": {
-    "default_path": "src/main/panel/panel.html"
+    "default_path": "src/main/panel/panel.html",
+    "default_width": 400
+  },
+  "icons": {
+    "16": "public/favicon.ico",
+    "48": "public/favicon-16x16.png",
+    "128": "public/favicon-32x32.png"
   },
   "action": {
     "default_title": "Click to open panel"

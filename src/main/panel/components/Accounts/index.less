@@ -1,8 +1,20 @@
 .account-list-wrapper {
+  display: flex;
+  background: unset;
   .account-list-header {
-    background: rgba(36, 129, 137, 0.5);
     display: flex;
-    align-items: center;
+    width: 100%;
+    background: linear-gradient(
+      to right,
+      rgba(37, 131, 131, 0.8),
+      rgba(37, 131, 131, 0.2) ;
+    );
     padding: 0 20px;
+    justify-content: space-between;
+  }
+
+  .account-list-content {
+    display: flex;
+    flex-direction: column;
   }
 }

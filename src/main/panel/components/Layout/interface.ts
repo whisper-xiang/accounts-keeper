@@ -12,4 +12,5 @@ export interface SideBarItem {
   key: string;
   component?: React.ComponentType<unknown> | React.ReactNode;
   link?: string;
+  path?: string;
 }

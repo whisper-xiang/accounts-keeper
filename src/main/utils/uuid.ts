@@ -1,3 +1,14 @@
+/*
+ * uuid.ts
+ */
+
+/**
+ * Generate a UUID string.
+ *
+ * @param len The length of the UUID string.
+ * @param radix The radix of the UUID string.
+ * @returns The UUID string.
+ */
 export function uuid2(len: number = 30, radix: number = 16): string {
   const chars: string[] =
     "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".split("");
