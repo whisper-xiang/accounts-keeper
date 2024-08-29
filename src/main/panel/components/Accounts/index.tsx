@@ -4,24 +4,26 @@ import { CreateModalType, WebsiteItem } from "./interface";
 import CreateSiteModal from "./components/Create";
 import AccountsHeader from "./components/AccountsHeader/index.tsx";
 import AccountsMain from "./components/AccountsMain/index.tsx";
-import { api } from "@/server";
+import { api, apiReady } from "@/server";
 import "./index.less";
-import MasterCreateModal from "./components/MasterCreateModal";
-import { getSettingsConfigs } from "../../../../server/configCache.ts";
-import { useNavigate } from "react-router-dom";
+import {
+  getSettingsConfigs,
+  updateSettingConfigs,
+} from "@/server/configCache.ts";
 import { LockOutlined } from "@ant-design/icons";
+import { initializeMasterPassword } from "@/server/utils.ts";
 const Accounts = () => {
   const { Content, Header } = Layout;
 
   const [list, setList] = useState<WebsiteItem[]>();
   const [filteredList, setFilteredList] = useState<WebsiteItem[]>();
   const [visible, setVisible] = useState(false);
+  const [form] = Form.useForm();
   const [createModalType, setCreateModalType] = useState<CreateModalType>(
     CreateModalType.CreateWebsite
   );
   const [activeWebsite, setActiveWebsite] = useState<WebsiteItem>();
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
   const [masterCreateVisible, setMasterCreateVisible] = useState(false);
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,14 +37,14 @@ const Accounts = () => {
   const getWebsiteList = async () => {
     setLoading(true);
     try {
+      await apiReady;
       const res = await api.fetchAndAssembleData();
-      console.log("res", res);
-
       setList(res);
       setFilteredList(res);
-      setLoading(false);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,7 +63,16 @@ const Accounts = () => {
     }
   };
 
-  const onFinish = (value: string) => {};
+  const onFinish = () => {
+    form.validateFields().then(async (values) => {
+      await updateSettingConfigs({
+        masterPassword: values.masterPassword,
+      });
+      await initializeMasterPassword();
+      setMasterCreateVisible(false);
+      setVisible(true);
+    });
+  };
 
   useEffect(() => {
     getWebsiteList();
@@ -97,33 +108,33 @@ const Accounts = () => {
       />
       <Modal
         open={masterCreateVisible}
-        onOk={() => navigate("/settings")}
+        onOk={onFinish}
         onClose={() => setMasterCreateVisible(false)}
         onCancel={() => setMasterCreateVisible(false)}
         title="提示"
       >
         <p>需要先设置主密码，才能存储账号。</p>
         <Form
+          form={form}
           name="createMaster"
-          labelCol={{ span: 4 }}
-          wrapperCol={{ span: 18 }}
-          layout="vertical"
-          onFinish={(values) => onFinish(values)}
+          labelCol={{ span: 8 }}
+          wrapperCol={{ span: 16 }}
+          layout="horizontal"
         >
           <Form.Item
-            label="MasterPassword"
+            label="Master Password"
             name="masterPassword"
             rules={[
               {
                 required: true,
-                message: "Please input your masterPassword!",
+                message: "Please input your master Password!",
               },
             ]}
           >
-            <Input
+            <Input.Password
               placeholder="input masterPassword"
               prefix={<LockOutlined style={{ color: "rgba(0,0,0,.25)" }} />}
-            ></Input>
+            ></Input.Password>
           </Form.Item>
         </Form>
 
@@ -135,10 +146,9 @@ const Accounts = () => {
         <strong>
           2. 请务必牢记主密码，切勿泄露。
           <br />
-          3. 主密码只存储在本地，一旦遗忘，所记录的所有账号密码将无法解密。
+          3. 主密码只存储在本地，一旦丢失，所记录的所有账号密码将无法解密。
         </strong>
       </Modal>
-      {/* <MasterCreateModal visible={masterCreateVisible} /> */}
     </Layout>
   );
 };

@@ -4,13 +4,16 @@ import { getSettingsConfigs } from "./configCache";
 let masterPassword: string | undefined;
 
 export const initializeMasterPassword = async () => {
-  masterPassword = (await getSettingsConfigs()).masterPassword;
+  const settings = await getSettingsConfigs();
+
+  masterPassword = settings.masterPassword;
 };
 
 export const encryptPassword = (password: string) => {
   if (!masterPassword) {
     throw new Error("Master password is not set");
   }
+
   return encrypt(masterPassword, password);
 };
 

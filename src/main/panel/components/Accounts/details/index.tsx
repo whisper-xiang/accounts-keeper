@@ -63,6 +63,8 @@ const Details: React.FC = () => {
           originalPassword: item.password, // 保存初始密码
         })
       );
+      console.log("initialList", initialList);
+
       setActiveWebsite(websiteDetail);
       setList(initialList);
     } catch (error) {

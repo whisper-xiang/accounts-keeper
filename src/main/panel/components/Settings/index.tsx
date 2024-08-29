@@ -2,10 +2,7 @@ import { Card, Divider, Form, Input, Layout, Radio, message } from "antd";
 import { useEffect, useState } from "react";
 import "./index.less";
 import { CloseOutlined, EditOutlined, SaveOutlined } from "@ant-design/icons";
-import {
-  getSettingsConfigs,
-  updateSettingConfigs,
-} from "../../../../server/configCache";
+import { getSettingsConfigs, updateSettingConfigs } from "@/server/configCache";
 import { SettingsConfigs, StorageMode } from "./types";
 import { initializeAPI } from "@/server";
 

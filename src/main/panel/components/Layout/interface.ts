@@ -1,7 +1,3 @@
-// export interface SideBarProps {}
-
-// export interface SideBarState {}
-
 export interface SideBarProps {
   onItemClick: (item: SideBarItem) => void; // 新增的回调函数类型
 }

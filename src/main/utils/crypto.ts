@@ -1,17 +1,37 @@
 import CryptoJS from "crypto-js";
 
-// 加密方法
-export function encrypt(secretKey: string, text: string): string {
-  const key = CryptoJS.enc.Utf8.parse(secretKey.padEnd(32, "0").slice(0, 32)); // 密钥处理
-  const iv = CryptoJS.enc.Utf8.parse(secretKey.padEnd(16, "0").slice(0, 16)); // IV处理
-  const encrypted = CryptoJS.AES.encrypt(text, key, { iv: iv });
-  return encrypted.toString(); // 返回密文
+/**
+ * Encrypts a given string using a secret key.
+ *
+ * @param {string} plaintext - The string to be encrypted.
+ * @param {string} secretKey - The secret key used for encryption.
+ * @returns {string} The encrypted string.
+ */
+export function encrypt(plaintext: string, secretKey: string): string {
+  const encrypted = CryptoJS.AES.encrypt(plaintext, secretKey).toString();
+  return encrypted;
 }
 
-// 解密方法
-export function decrypt(secretKey: string, encryptedText: string): string {
-  const key = CryptoJS.enc.Utf8.parse(secretKey.padEnd(32, "0").slice(0, 32)); // 密钥处理
-  const iv = CryptoJS.enc.Utf8.parse(secretKey.padEnd(16, "0").slice(0, 16)); // IV处理
-  const decrypted = CryptoJS.AES.decrypt(encryptedText, key, { iv: iv });
-  return decrypted.toString(CryptoJS.enc.Utf8); // 返回明文
+/**
+ * Decrypts a given encrypted string using a secret key.
+ *
+ * @param {string} ciphertext - The encrypted string to be decrypted.
+ * @param {string} secretKey - The secret key used for decryption.
+ * @returns {string} The decrypted string.
+ */
+export function decrypt(ciphertext: string, secretKey: string): string {
+  const bytes = CryptoJS.AES.decrypt(ciphertext, secretKey);
+
+  // Convert decrypted data to a UTF-8 string
+  const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+
+  // Check for empty result
+  if (!decrypted) {
+    throw new Error(
+      "Decryption failed, possibly due to an incorrect secret key."
+    );
+  }
+  console.log("decrypted: ", decrypted);
+
+  return decrypted;
 }

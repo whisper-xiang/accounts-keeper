@@ -4,18 +4,23 @@ import { getSettingsConfigs } from "./configCache";
 import { message } from "antd";
 import { decryptPassword, encryptPassword } from "./utils";
 
-const { appId, appKey, serverURL } = await getSettingsConfigs();
+async function initLeanCloud() {
+  const { appId, appKey, serverURL } = await getSettingsConfigs();
 
-try {
-  AV.init({
-    appId: appId || "",
-    appKey: appKey || "",
-    serverURL,
-  });
-} catch (e: any) {
-  message.error("LeanCloud init error: " + e.message);
-  console.error("LeanCloud init error", e);
+  try {
+    AV.init({
+      appId: appId || "",
+      appKey: appKey || "",
+      serverURL,
+    });
+  } catch (e: any) {
+    message.error("LeanCloud init error: " + e.message);
+    console.error("LeanCloud init error", e);
+  }
 }
+
+// 调用初始化函数
+initLeanCloud();
 
 export async function ensureTableExists(tableName: string): Promise<void> {
   try {
@@ -24,10 +29,10 @@ export async function ensureTableExists(tableName: string): Promise<void> {
   } catch (error) {
     if ((error as AV.Error).code === 101) {
       // 表不存在的情况
-      const Table = AV.Object.extend(tableName);
+      const Table = await AV.Object.extend(tableName);
       const dummyRecord = new Table();
       await dummyRecord.save().then((record) => record.destroy()); // 创建并删除一条记录，以确保表存在但没有数据
-      console.log(`${tableName} 表已创建`);
+      console.info(`${tableName} 表已创建`);
     } else {
       throw error; // 其他错误，抛出异常
     }
@@ -60,11 +65,11 @@ export async function fetchAndAssembleData() {
 
     return {
       ...website.toJSON(),
-      accounts: relatedAccounts.map((account) => {
+      accounts: (relatedAccounts || []).map((account) => {
         const item = account.toJSON();
         return {
           ...item,
-          password: decryptPassword(item.password),
+          password: decryptPassword(item?.password),
         };
       }),
     };

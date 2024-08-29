@@ -15,7 +15,7 @@ import "./index.less";
 import {
   getPwdGeneratorCache,
   updatePwdGeneratorCache,
-} from "../../../../server/configCache";
+} from "@/server/configCache";
 import { generatePassword } from "./utils";
 
 const PasswordGenerator: React.FC = () => {

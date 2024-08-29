@@ -15,7 +15,7 @@ async function loadAPI(storageMode: StorageMode) {
   }
 }
 
-async function initializeAPI() {
+export async function initializeAPI() {
   try {
     const { storageMode } =
       (await getSettingsConfigs()) ||
@@ -31,7 +31,10 @@ async function initializeAPI() {
   }
 }
 
-export const getFaviconUrl = (url) => {
+// 初始化 API，并导出初始化的 Promise
+const apiReady = initializeAPI();
+
+export const getFaviconUrl = (url: string) => {
   try {
     const domain = new URL(url).origin;
     return `https://www.google.com/s2/favicons?domain=${domain}`;
@@ -40,6 +43,5 @@ export const getFaviconUrl = (url) => {
   }
 };
 
-await initializeAPI();
-
-export { initializeAPI, api };
+// 导出已经初始化的 API 和 `apiReady` Promise
+export { api, apiReady };

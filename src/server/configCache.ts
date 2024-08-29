@@ -7,7 +7,7 @@ import { PasswordGenerator } from "../main/panel/components/Generator/types";
 
 export const getSettingsConfigs: () => Promise<SettingsConfigs> = async () => {
   return new Promise((resolve) => {
-    chrome.storage.sync.get([SETTINGS_NAME], (result) => {
+    chrome.storage.local.get([SETTINGS_NAME], (result) => {
       resolve(result[SETTINGS_NAME]);
     });
   });
@@ -17,7 +17,7 @@ export const setSettingsConfigs: (
   configs: SettingsConfigs
 ) => Promise<SettingsConfigs> = async (configs) => {
   return new Promise((resolve) => {
-    chrome.storage.sync.set({ [SETTINGS_NAME]: configs }, () => {
+    chrome.storage.local.set({ [SETTINGS_NAME]: configs }, () => {
       resolve(configs);
     });
   });
@@ -25,7 +25,7 @@ export const setSettingsConfigs: (
 
 export const clearSettingsCache: () => Promise<void> = async () => {
   return new Promise((resolve) => {
-    chrome.storage.sync.remove([SETTINGS_NAME], () => {
+    chrome.storage.local.remove([SETTINGS_NAME], () => {
       resolve();
     });
   });
@@ -43,7 +43,7 @@ export const updateSettingConfigs: (
 export const getPwdGeneratorCache: () => Promise<PasswordGenerator> =
   async () => {
     return new Promise((resolve) => {
-      chrome.storage.sync.get([GENERATOR_NAME], (result) => {
+      chrome.storage.local.get([GENERATOR_NAME], (result) => {
         resolve(result[GENERATOR_NAME]);
       });
     });
@@ -53,7 +53,7 @@ export const setPwdGeneratorCache: (
   generator: PasswordGenerator
 ) => Promise<void> = async (generator) => {
   return new Promise((resolve) => {
-    chrome.storage.sync.set({ [GENERATOR_NAME]: generator }, () => {
+    chrome.storage.local.set({ [GENERATOR_NAME]: generator }, () => {
       resolve();
     });
   });

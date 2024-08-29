@@ -1,4 +1,4 @@
-import { getPwdGeneratorCache } from "../../../../server/configCache";
+import { getPwdGeneratorCache } from "@/server/configCache";
 
 export const generatePassword = async (
   callback?: (password: string) => void
