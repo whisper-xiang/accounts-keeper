@@ -17,16 +17,16 @@
 - 密码生成器，支持随机密码生成。
 
 ## 部分截图
-<div class="flex justify-between items-center gap-4">
-  <img src="public/create.png" alt="Create Screenshot" class="w-1/5 rounded-lg">
-  <img src="public/index.png" alt="Index Screenshot" class="w-1/5 rounded-lg">
-  <img src="public/generate.png" alt="Generate Screenshot" class="w-1/5 rounded-lg">
+<div style="display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+  <img src="public/index.png" alt="Index Screenshot" style="width: 20%; border-radius: 8px;">
+  <img src="public/create.png" alt="Create Screenshot" style="width: 20%; border-radius: 8px;">
+  <img src="public/generate.png" alt="Generate Screenshot" style="width: 20%; border-radius: 8px;">
+  <img src="public/settings.png" alt="Generate Screenshot" style="width: 20%; border-radius: 8px;">
 </div>
 
 ## 安装使用
 
-- 下载项目打包后，在chrome浏览器中打开`chrome://extensions/`，勾选开发者模式，点击`加载已解压的扩展程序`，选择 dist 文件夹。
-  - 待优化后考虑将插件发布到chrome商店。
+- 打开chrome浏览器`chrome://extensions/`，勾选开发者模式，点击`加载已解压的扩展程序`。选择项目根目录下的 `dist` 文件夹。
 - 打开插件设置页面，配置存储位置和主密码。
 - 打开插件主页面，开始记录账号密码。
 
@@ -38,7 +38,6 @@
   - 若leanCloud存储，需要在插件设置页面配置leanCloud的api_key和api_secret。
   - 若chrome storage local存储，不需要配置。 也可切换至chrome storage sync存储。
   - 若chrome storage sync存储，需要在chrome浏览器设置中开启同步。
-  ![alt text](public/settings.png)
 
 
 
