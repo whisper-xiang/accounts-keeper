@@ -29,7 +29,7 @@ type FieldType = {
   username?: string;
   password?: string;
   note?: string;
-  icon?: string;
+  logo?: string;
 };
 
 const MasterCreateModal = ({
@@ -52,11 +52,11 @@ const MasterCreateModal = ({
   const [loading, setLoading] = useState(false);
 
   const addWebsite = (site: string, note: string) => {
-    const icon = getFaviconUrl(site);
+    const logo = getFaviconUrl(site);
     return api.addWebsite({
       url: site,
       note,
-      icon,
+      logo,
     });
   };
 
@@ -224,10 +224,10 @@ const MasterCreateModal = ({
                 disabled={type === CreateModalType.CreateAccount}
                 placeholder="input website!"
                 prefix={
-                  activeSite?.icon ? (
+                  activeSite?.logo ? (
                     <img
-                      src={activeSite.icon}
-                      alt={activeSite.icon}
+                      src={activeSite.logo}
+                      alt={activeSite.logo}
                       width="16"
                       height="16"
                     />

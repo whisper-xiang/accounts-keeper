@@ -7,7 +7,7 @@ import CryptoJS from "crypto-js";
  * @param {string} secretKey - The secret key used for encryption.
  * @returns {string} The encrypted string.
  */
-export function encrypt(plaintext: string, secretKey: string): string {
+export function encrypt(secretKey: string, plaintext: string): string {
   const encrypted = CryptoJS.AES.encrypt(plaintext, secretKey).toString();
   return encrypted;
 }
@@ -19,7 +19,7 @@ export function encrypt(plaintext: string, secretKey: string): string {
  * @param {string} secretKey - The secret key used for decryption.
  * @returns {string} The decrypted string.
  */
-export function decrypt(ciphertext: string, secretKey: string): string {
+export function decrypt(secretKey: string, ciphertext: string): string {
   const bytes = CryptoJS.AES.decrypt(ciphertext, secretKey);
 
   // Convert decrypted data to a UTF-8 string
@@ -27,11 +27,8 @@ export function decrypt(ciphertext: string, secretKey: string): string {
 
   // Check for empty result
   if (!decrypted) {
-    throw new Error(
-      "Decryption failed, possibly due to an incorrect secret key."
-    );
+    return "";
   }
-  console.log("decrypted: ", decrypted);
 
   return decrypted;
 }

@@ -43,8 +43,7 @@ const AccountsMain = ({
       cancelText: "No",
       onOk() {
         setLoading(true);
-        api
-          .deleteWebsite(websiteId)
+        api("deleteWebsite", websiteId)
           .then(() => {
             messageApi.open({
               type: "success",
@@ -143,9 +142,14 @@ const AccountsMain = ({
                 avatar={
                   <Avatar
                     src={
-                      item.icon ||
+                      item.logo ||
                       "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png"
                     }
+                    onClick={(e) => {
+                      e?.stopPropagation();
+                      window.open(item.url);
+                    }}
+                    size={28}
                   />
                 }
                 title={
@@ -155,10 +159,6 @@ const AccountsMain = ({
                         overflow: "hidden",
                         textOverflow: "ellipsis",
                         whiteSpace: "nowrap",
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        window.open(item.url);
                       }}
                     >
                       {item.url}

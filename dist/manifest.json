@@ -5,7 +5,8 @@
   "version": "1.0.0",
   "permissions": [
     "sidePanel",
-    "storage"
+    "storage",
+    "tabs"
   ],
   "side_panel": {
     "default_path": "src/main/panel/panel.html",
@@ -22,8 +23,7 @@
   "content_scripts": [
     {
       "js": [
-        "src/content/content.ts-loader.js",
-        "src/content/content.tsx-loader.js"
+        "src/content/content.ts-loader.js"
       ],
       "matches": [
         "<all_urls>"

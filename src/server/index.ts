@@ -1,8 +1,9 @@
 import { StorageMode } from "../main/panel/components/Settings/types";
+import { initLeanCloud } from "./cloud";
 import { getSettingsConfigs, setSettingsConfigs } from "./configCache";
 import { initializeMasterPassword } from "./utils";
 
-let api: any = null;
+let apiOrigin: any = null;
 
 async function loadAPI(storageMode: StorageMode) {
   switch (storageMode) {
@@ -22,16 +23,18 @@ export async function initializeAPI() {
       (await setSettingsConfigs({
         storageMode: StorageMode.ChromeStorageLocal,
       }));
-    api = await loadAPI(storageMode);
+    apiOrigin = await loadAPI(storageMode);
     initializeMasterPassword();
-    return api;
+    if (storageMode === StorageMode.Cloud) {
+      await initLeanCloud();
+    }
+    return apiOrigin;
   } catch (error) {
     console.error("Failed to load API:", error);
     throw error;
   }
 }
 
-// 初始化 API，并导出初始化的 Promise
 const apiReady = initializeAPI();
 
 export const getFaviconUrl = (url: string) => {
@@ -39,9 +42,17 @@ export const getFaviconUrl = (url: string) => {
     const domain = new URL(url).origin;
     return `https://www.google.com/s2/favicons?domain=${domain}`;
   } catch (e: any) {
-    return e;
+    console.error(e);
+    return "";
   }
 };
 
-// 导出已经初始化的 API 和 `apiReady` Promise
+async function api(methodName: string, ...args: any[]) {
+  await apiReady; // 确保 API 已经初始化
+  if (!apiOrigin || !apiOrigin[methodName]) {
+    throw new Error(`API method ${methodName} not found.`);
+  }
+  return apiOrigin[methodName](...args);
+}
+
 export { api, apiReady };

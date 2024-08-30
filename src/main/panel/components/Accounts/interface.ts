@@ -11,7 +11,7 @@ export interface WebsiteItem {
   objectId: string;
   url: string;
   accounts: AccountItem[];
-  icon?: string;
+  logo?: string;
   note?: string;
 }
 

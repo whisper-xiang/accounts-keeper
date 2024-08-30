@@ -15,7 +15,7 @@ importers:
         specifier: ^5.20.0
         version: 5.20.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       crypto-js:
-        specifier: ^4.2.0
+        specifier: ^4.1.1
         version: 4.2.0
       leancloud-storage:
         specifier: ^4.15.2

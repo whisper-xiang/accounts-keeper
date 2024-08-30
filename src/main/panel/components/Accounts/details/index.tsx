@@ -56,15 +56,13 @@ const Details: React.FC = () => {
   const getAccountList = async () => {
     setLoading(true);
     try {
-      const websiteDetail = await api.fetchWebsiteById(websiteId);
+      const websiteDetail = await api("fetchWebsiteById", websiteId);
       const initialList = websiteDetail.accounts.map(
         (item: FormAccountType) => ({
           ...item,
           originalPassword: item.password, // 保存初始密码
         })
       );
-      console.log("initialList", initialList);
-
       setActiveWebsite(websiteDetail);
       setList(initialList);
     } catch (error) {
@@ -86,7 +84,7 @@ const Details: React.FC = () => {
       updatedList[index].passwordVisible = false;
       setList(updatedList);
 
-      api.updateAccount(websiteId, accountId, values).then(() => {
+      api("updateAccount", websiteId, accountId, values).then(() => {
         messageApi.open({
           type: "success",
           content: "Account updated successfully!",
@@ -128,8 +126,7 @@ const Details: React.FC = () => {
       cancelText: "No",
       onOk() {
         setLoading(true); // Start loading for delete operation
-        api
-          .deleteAccount(websiteId, accountId)
+        api("deleteAccount", websiteId, accountId)
           .then(() => {
             messageApi.open({
               type: "success",
@@ -139,7 +136,6 @@ const Details: React.FC = () => {
               (item) => item.objectId !== accountId
             );
             setList(updatedList);
-            console.log("Account deleted");
           })
           .finally(() => {
             setLoading(false);
@@ -214,7 +210,15 @@ const Details: React.FC = () => {
         <header>
           <h1 onClick={() => navigate(-1)} className="cursor-pointer">
             <LeftOutlined />
-            <span className="ml-2">{activeWebsite?.url}</span>
+            <span className="ml-2">
+              <Avatar
+                src={
+                  activeWebsite?.logo ||
+                  "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png"
+                }
+                size={24}
+              />
+            </span>
           </h1>
           <Button
             type="default"

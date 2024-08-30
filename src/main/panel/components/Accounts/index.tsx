@@ -38,7 +38,7 @@ const Accounts = () => {
     setLoading(true);
     try {
       await apiReady;
-      const res = await api.fetchAndAssembleData();
+      const res = await api("fetchAndAssembleData");
       setList(res);
       setFilteredList(res);
     } catch (error) {

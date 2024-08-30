@@ -21,5 +21,6 @@ export const decryptPassword = (encryptedPassword: string) => {
   if (!masterPassword) {
     throw new Error("Master password is not set");
   }
+
   return decrypt(masterPassword, encryptedPassword);
 };

@@ -6,7 +6,7 @@ interface Website {
   objectId: string;
   url: string;
   note: string;
-  icon?: string;
+  logo?: string;
   accounts: {
     objectId: string;
     username: string;
@@ -63,11 +63,11 @@ export async function fetchWebsiteById(
 export async function addWebsite({
   url,
   note,
-  icon,
+  logo,
 }: {
   url: string;
   note: string;
-  icon: string;
+  logo: string;
 }) {
   return new Promise((resolve) => {
     chrome.storage.local.get([Website_KEY], (result) => {
@@ -76,7 +76,7 @@ export async function addWebsite({
         objectId: uuid2(),
         url,
         note,
-        icon,
+        logo,
         accounts: [],
       };
       websites.push(website);

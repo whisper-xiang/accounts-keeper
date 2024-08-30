@@ -3,7 +3,7 @@
   "name": "Accounts Keeper",
   "description": "record and manage your accounts, by react",
   "version": "1.0.0",
-  "permissions": ["sidePanel", "storage"],
+  "permissions": ["sidePanel", "storage", "tabs"],
   "side_panel": {
     "default_path": "src/main/panel/panel.html",
     "default_width": 400
@@ -18,7 +18,7 @@
   },
   "content_scripts": [
     {
-      "js": ["src/content/content.ts", "src/content/content.tsx"],
+      "js": ["src/content/content.ts"],
       "matches": ["<all_urls>"],
       "all_frames": true,
       "run_at": "document_end",

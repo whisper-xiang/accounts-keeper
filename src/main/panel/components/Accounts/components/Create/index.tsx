@@ -29,7 +29,7 @@ type FieldType = {
   username?: string;
   password?: string;
   note?: string;
-  icon?: string;
+  logo?: string;
 };
 
 const CreateAccount = ({
@@ -50,13 +50,14 @@ const CreateAccount = ({
   const [password, setPassword] = useState("");
   const [site, setSite] = useState("");
   const [loading, setLoading] = useState(false);
+  const [defaultSite, setDefaultSite] = useState<string | undefined>();
 
   const addWebsite = (site: string, note: string) => {
-    const icon = getFaviconUrl(site);
-    return api.addWebsite({
+    const logo = getFaviconUrl(site) || "";
+    return api("addWebsite", {
       url: site,
       note,
-      icon,
+      logo,
     });
   };
 
@@ -66,8 +67,7 @@ const CreateAccount = ({
     password: string,
     note?: string
   ) => {
-    await api
-      .addAccount(websiteId, username, password, note)
+    await api("addAccount", websiteId, username, password, note)
       .then(() => {
         messageApi.open({
           type: "success",
@@ -84,6 +84,10 @@ const CreateAccount = ({
 
   const onOkHandler = () => {
     setLoading(true);
+    form.setFieldValue(
+      "site",
+      form.getFieldValue("site")?.trim() || defaultSite
+    );
     form
       .validateFields()
       .then(async (values) => {
@@ -106,7 +110,7 @@ const CreateAccount = ({
           }
         } else if (type === CreateModalType.UpdateWebsite) {
           if (activeSite?.objectId) {
-            await api.updateWebsite(activeSite?.objectId, site, note);
+            await api("updateWebsite", activeSite?.objectId, site, note);
             messageApi.open({
               type: "success",
               content: "Website updated successfully!",
@@ -157,6 +161,12 @@ const CreateAccount = ({
   };
 
   useEffect(() => {
+    // 获取当前活动标签页的 URL
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      const currentTab = tabs[0];
+      const currentUrl = currentTab.url;
+      setDefaultSite(currentUrl);
+    });
     if (!visible) {
       return;
     }
@@ -166,15 +176,24 @@ const CreateAccount = ({
     }
   }, [visible, activeSite, form]);
 
+  const UrlDiv = () => {
+    return <div className="truncate">{activeSite?.url}</div>;
+  };
   return (
     <Modal
       getContainer={false}
       title={
-        type === CreateModalType.CreateWebsite
-          ? "Create a new website"
-          : type === CreateModalType.CreateAccount
-          ? `Create a new account for ${activeSite?.url}`
-          : `Update website: ${activeSite?.url}`
+        type === CreateModalType.CreateWebsite ? (
+          "Create a new website"
+        ) : type === CreateModalType.CreateAccount ? (
+          <>
+            Create a new account for <UrlDiv />
+          </>
+        ) : (
+          <>
+            Update website: <UrlDiv />
+          </>
+        )
       }
       open={visible}
       onOk={onOkHandler}
@@ -222,12 +241,12 @@ const CreateAccount = ({
                 value={site}
                 onChange={(e) => setSite(e.target.value)}
                 disabled={type === CreateModalType.CreateAccount}
-                placeholder="input website!"
+                placeholder={defaultSite}
                 prefix={
-                  activeSite?.icon ? (
+                  activeSite?.logo ? (
                     <img
-                      src={activeSite.icon}
-                      alt={activeSite.icon}
+                      src={activeSite.logo}
+                      alt={activeSite.logo}
                       width="16"
                       height="16"
                     />

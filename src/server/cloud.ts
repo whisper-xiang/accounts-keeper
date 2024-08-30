@@ -4,7 +4,7 @@ import { getSettingsConfigs } from "./configCache";
 import { message } from "antd";
 import { decryptPassword, encryptPassword } from "./utils";
 
-async function initLeanCloud() {
+export async function initLeanCloud() {
   const { appId, appKey, serverURL } = await getSettingsConfigs();
 
   try {
@@ -104,16 +104,16 @@ export async function fetchWebsiteById(websiteId: string) {
 export async function addWebsite({
   url,
   note,
-  icon,
+  logo,
 }: {
   url: string;
   note: string;
-  icon: string;
+  logo: string;
 }) {
   const website = new AV.Object("Websites");
   website.set("url", url);
   website.set("note", note);
-  website.set("icon", icon);
+  website.set("logo", logo);
   await website.save();
   return website.id;
 }
