@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.0.1](https://github.com/whisper-xiang/accounts-keeper/compare/v0.0.0...v0.0.1) (2024-08-30)
+
+
+### Bug Fixes
+
+* 交互调整 ([ec96ae5](https://github.com/whisper-xiang/accounts-keeper/commit/ec96ae5d3a9a0df6e1d39cbe16a3da6a39b898ae))
+* 交互调整 ([c690589](https://github.com/whisper-xiang/accounts-keeper/commit/c690589e72c874a5eaf1e978a5789f139b74e515))
+* 加密解密调整 ([e63c22a](https://github.com/whisper-xiang/accounts-keeper/commit/e63c22a2a1be90e118cb5408127e60d391fb325d))
+
 ## 0.0.0 (2024-08-29)
 
 
