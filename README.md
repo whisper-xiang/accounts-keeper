@@ -25,10 +25,9 @@
 </div>
 
 ## 安装使用
-
-- 打开chrome浏览器`chrome://extensions/`，勾选开发者模式，点击`加载已解压的扩展程序`。选择项目根目录下的 `dist` 文件夹。
-- 打开插件设置页面，配置存储位置和主密码。
+- [下载](https://github.com/whisper-xiang/accounts-keeper/releases/tag/v0.0.1)最新版的插件压缩包，解压后将`dist`文件夹拷贝至chrome浏览器的`chrome://extensions/`目录下。
 - 打开插件主页面，开始记录账号密码。
+- 首次记账，需要设置主密码。
 
 ## 配置
 
