@@ -154,21 +154,13 @@ const AccountsMain = ({
                 }
                 title={
                   <div className="flex items-center justify-between">
+                    <span className="truncate">{item.url}</span>
                     <span
-                      style={{
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
+                      className="ml-2 text-xs text-gray-500"
+                      style={{ minWidth: "26px" }}
                     >
-                      {item.url}
-                      <span className="ml-2 text-xs text-gray-500">
-                        ( {item?.accounts?.length} accounts )
-                      </span>
+                      ( {item?.accounts?.length} )
                     </span>
-                    {/* <div className="ml-2 text-xs text-gray-500">
-                      {item?.accounts?.length} accounts
-                    </div> */}
                   </div>
                 }
                 description={item.note}

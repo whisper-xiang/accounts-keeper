@@ -9,6 +9,7 @@ import {
   Tooltip,
   message,
   Spin,
+  Select,
 } from "antd";
 import {
   CopyOutlined,
@@ -23,6 +24,7 @@ import "./index.less";
 import { CreateModalType, WebsiteItem } from "../../interface";
 
 import { api, getFaviconUrl } from "@/server";
+const { Option } = Select;
 
 type FieldType = {
   site?: string;
@@ -51,11 +53,12 @@ const CreateAccount = ({
   const [site, setSite] = useState("");
   const [loading, setLoading] = useState(false);
   const [defaultSite, setDefaultSite] = useState<string | undefined>();
+  const [protocol, setProtocol] = useState("https://");
 
   const addWebsite = (site: string, note: string) => {
-    const logo = getFaviconUrl(site) || "";
+    const logo = getFaviconUrl(`${protocol}${site}`) || "";
     return api("addWebsite", {
-      url: site,
+      url: `${protocol}${site}`,
       note,
       logo,
     });
@@ -160,13 +163,40 @@ const CreateAccount = ({
     onClose();
   };
 
-  useEffect(() => {
-    // 获取当前活动标签页的 URL
+  const selectBefore = (
+    <Select defaultValue={protocol} onChange={(value) => setProtocol(value)}>
+      <Option value="http://">http://</Option>
+      <Option value="https://">https://</Option>
+    </Select>
+  );
+
+  const getDefaultSite = () => {
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       const currentTab = tabs[0];
       const currentUrl = currentTab.url;
-      setDefaultSite(currentUrl);
+
+      if (!currentUrl) return;
+
+      try {
+        const url = new URL(currentUrl);
+        const protocol = url.protocol; // 获取协议部分，例如 "https:"
+        const site = url.host + url.pathname; // 获取主机和路径部分，例如 "www.example.com/path"
+
+        // 移除最后的斜杠（如果存在）
+        const siteWithoutTrailingSlash = site.endsWith("/")
+          ? site.slice(0, -1)
+          : site;
+
+        setProtocol(protocol);
+        setDefaultSite(siteWithoutTrailingSlash);
+      } catch (error) {
+        console.error("Invalid URL:", error);
+      }
     });
+  };
+  useEffect(() => {
+    getDefaultSite();
+
     if (!visible) {
       return;
     }
@@ -176,9 +206,6 @@ const CreateAccount = ({
     }
   }, [visible, activeSite, form]);
 
-  const UrlDiv = () => {
-    return <div className="truncate">{activeSite?.url}</div>;
-  };
   return (
     <Modal
       getContainer={false}
@@ -186,13 +213,9 @@ const CreateAccount = ({
         type === CreateModalType.CreateWebsite ? (
           "Create a new website"
         ) : type === CreateModalType.CreateAccount ? (
-          <>
-            Create a new account for <UrlDiv />
-          </>
+          <>Create a new account</>
         ) : (
-          <>
-            Update website: <UrlDiv />
-          </>
+          <>Update website</>
         )
       }
       open={visible}
@@ -223,21 +246,22 @@ const CreateAccount = ({
           <Form.Item<FieldType>
             label="Site"
             name="site"
-            rules={
-              [
-                CreateModalType.CreateWebsite,
-                CreateModalType.UpdateWebsite,
-              ].includes(type)
-                ? [{ required: true, message: "Please input your website!" }]
-                : [
-                    {
-                      required: false,
-                    },
-                  ]
-            }
+            // rules={
+            //   [
+            //     CreateModalType.CreateWebsite,
+            //     CreateModalType.UpdateWebsite,
+            //   ].includes(type)
+            //     ? [{ required: true, message: "Please input your website!" }]
+            //     : [
+            //         {
+            //           required: false,
+            //         },
+            //       ]
+            // }
           >
             <Space.Compact style={{ width: "100%" }}>
               <Input
+                addonBefore={selectBefore}
                 value={site}
                 onChange={(e) => setSite(e.target.value)}
                 disabled={type === CreateModalType.CreateAccount}
