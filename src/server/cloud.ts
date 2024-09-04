@@ -19,9 +19,6 @@ export async function initLeanCloud() {
   }
 }
 
-// 调用初始化函数
-initLeanCloud();
-
 export async function ensureTableExists(tableName: string): Promise<void> {
   try {
     const query = new AV.Query(tableName);
